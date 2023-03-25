@@ -63,7 +63,7 @@ bot.onText(/\/add/, async (msg) => {
     await BotHelpers.sendDelete(
       bot,
       chatId,
-      "If you want register yourself inside any community, please register yourself throw the command /add in the chat of that community.",
+      "If you want register yourself inside any community, please register yourself – throw the command /add in the chat of that community.",
       5000
     );
 
