@@ -119,37 +119,37 @@ bot.on("new_chat_members", async (msg) => {
   });
 });
 
-bot.onText(/\/getAllGroups/, async (msg) => {
-  console.log(msg.from.id);
+// bot.onText(/\/getAllGroups/, async (msg) => {
+//   console.log(msg.from.id);
 
-  const userId = msg.from.id;
+//   const userId = msg.from.id;
 
-  await bot.getUpdates().then((updates) => {
-    const chats = new Set();
+//   await bot.getUpdates().then((updates) => {
+//     const chats = new Set();
 
-    for (const update of updates) {
-      const message = update.message;
-      if (message && message.chat) {
-        const chatId = message.chat.id;
-        chats.add(chatId);
-      }
-    }
+//     for (const update of updates) {
+//       const message = update.message;
+//       if (message && message.chat) {
+//         const chatId = message.chat.id;
+//         chats.add(chatId);
+//       }
+//     }
 
-    console.log(chats);
+//     console.log(chats);
 
-    const adminChats = [];
-    for (const chatId of chats) {
-      // Получаем информацию о пользователе в чате
-      bot.getChatMember(chatId, userId).then((chatMember) => {
-        if (
-          chatMember.status === "administrator" ||
-          chatMember.status === "creator"
-        ) {
-          adminChats.push(chatId);
-        }
-      });
-    }
+//     const adminChats = [];
+//     for (const chatId of chats) {
+//       // Получаем информацию о пользователе в чате
+//       bot.getChatMember(chatId, userId).then((chatMember) => {
+//         if (
+//           chatMember.status === "administrator" ||
+//           chatMember.status === "creator"
+//         ) {
+//           adminChats.push(chatId);
+//         }
+//       });
+//     }
 
-    console.log(adminChats);
-  });
-});
+//     console.log(adminChats);
+//   });
+// });
