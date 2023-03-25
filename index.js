@@ -99,7 +99,12 @@ bot.onText(/\/add/, async (msg) => {
 bot.on("new_chat_members", async (msg) => {
   const chatId = msg.chat.id;
   const newMembers = msg.new_chat_members;
+
   newMembers.forEach(async (member) => {
+    if (member.is_bot) {
+      return;
+    }
+
     const userId = member.id;
     const userData = await UserService.getUserData(bot, chatId, userId);
     const userPhoto = await UserService.getUserProfilePhotos(
