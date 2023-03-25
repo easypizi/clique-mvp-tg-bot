@@ -2,13 +2,12 @@
   "name": "cluque-web-app-tg-bot",
   "version": "1.0.0",
   "description": "",
-  "main": "index.js",
-  "type": "module",
+  "main": "src/index.js",
   "scripts": {
-    "start": "node dist/index.js",
-    "build": "babel index.js -d dist --extensions \".js,.mjs\"",
+    "start": "node dist",
+    "build": "babel src -d dist",
     "heroku-postbuild": "npm run build",
-    "dev": "nodemon index.js"
+    "dev": "nodemon src/index.js"
   },
   "keywords": [],
   "author": "",

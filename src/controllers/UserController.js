@@ -1,5 +1,5 @@
-import request from 'request';
-import BotHelpers from '../helpers/BotHelpers.js';
+import request from "request";
+import BotHelpers from "../helpers/BotHelpers.js";
 
 class UserController {
   async addNewUser(bot, api_url, preparedData, chatId) {
@@ -21,7 +21,7 @@ class UserController {
               BotHelpers.sendDelete(
                 bot,
                 chatId,
-                body?.message ?? 'Something went wrong, try again later',
+                body?.message ?? "Something went wrong, try again later",
                 2000
               );
 
@@ -31,7 +31,7 @@ class UserController {
           }
         );
       } catch (error) {
-        console.error('Error during sending Data to API');
+        console.error("Error during sending Data to API");
       }
     }
   }
