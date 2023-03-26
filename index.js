@@ -42,7 +42,9 @@ bot.on("polling_error", (error) => {
 // OPEN APP
 bot.onText(/\/open_app/, async (msg) => {
   const chatId = msg.chat.id;
+  const commandMsgId = msg.message_id;
   const isPrivate = msg?.chat?.type === "private";
+  await BotHelper.deleteMessage(bot, chatId, isPrivate, commandMsgId, 500);
   try {
     if (isPrivate) {
       await bot.sendMessage(chatId, "Click below to open the app: ", {
