@@ -1,7 +1,7 @@
 import dotenv from "dotenv";
 import TelegramBot from "node-telegram-bot-api";
-import userController from "./controllers/userController.js";
-import BotHelpers from "./helpers/BotHelpers.js";
+import UserController from "./controllers/userController.js";
+import BotHelper from "./helpers/BotHelpers.js";
 import UserService from "./services/UserService.js";
 
 dotenv.config();
@@ -59,10 +59,10 @@ bot.onText(/\/add/, async (msg) => {
   const isPrivate = msg?.chat?.type === "private";
   const commandMsgId = msg.message_id;
   const chatId = msg.chat.id;
-  await BotHelpers.deleteMessage(bot, chatId, commandMsgId, 500);
+  await BotHelper.deleteMessage(bot, chatId, commandMsgId, 500);
 
   if (isPrivate) {
-    await BotHelpers.sendDelete(
+    await BotHelper.sendDelete(
       bot,
       chatId,
       "If you want register yourself inside any community, please register yourself – throw the command /add in the chat of that community.",
@@ -91,7 +91,7 @@ bot.onText(/\/add/, async (msg) => {
     groupAdmins
   );
 
-  await userController.addNewUser(bot, API_URL, preparedData, chatId);
+  await UserController.addNewUser(bot, API_URL, preparedData, chatId);
 });
 
 bot.on("new_chat_members", async (msg) => {
@@ -118,6 +118,6 @@ bot.on("new_chat_members", async (msg) => {
       groupAdmins
     );
 
-    await userController.addNewUser(bot, API_URL, preparedData, chatId);
+    await UserController.addNewUser(bot, API_URL, preparedData, chatId);
   });
 });
