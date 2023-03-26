@@ -8,33 +8,32 @@ import BotHelper from "./src/helpers/BotHelpers.js";
 import UserService from "./src/services/UserService.js";
 
 dotenv.config();
-const app = express();
-app.use(bodyParser.json());
-
-let server = app.listen(process.env.PORT, "0.0.0.0", () => {
-  const host = server.address().address;
-  const port = server.address().port;
-  console.log("Web server started at http://%s:%s", host, port);
-});
 
 const token = process.env.TG_BOT_TOKEN;
-let bot;
 const WEB_APP_URL = process.env.WEB_APP_URL;
 const API_URL = process.env.API_URL;
+let bot;
 
 if (process.env.NODE_ENV === "production") {
+  //SERVER FOR WEB HOOK
+  const app = express();
+  app.use(bodyParser.json());
   bot = new TelegramBot(token);
   bot.setWebHook(process.env.HEROKU_URL + bot.token);
+  let server = app.listen(process.env.PORT, "0.0.0.0", () => {
+    const host = server.address().address;
+    const port = server.address().port;
+    console.log("Web server started at http://%s:%s", host, port);
+  });
+  app.post("/" + bot.token, (req, res) => {
+    bot.processUpdate(req.body);
+    res.sendStatus(200);
+  });
+
+  console.log("Bot server started in the " + process.env.NODE_ENV + " mode");
 } else {
   bot = new TelegramBot(token, { polling: true });
 }
-
-app.post("/" + bot.token, (req, res) => {
-  bot.processUpdate(req.body);
-  res.sendStatus(200);
-});
-
-console.log("Bot server started in the " + process.env.NODE_ENV + " mode");
 
 bot.on("polling_error", (error) => {
   console.log(error.code); // => 'EFATAL'
