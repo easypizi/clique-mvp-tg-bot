@@ -24,9 +24,6 @@ class UserController {
                 body?.message ?? "Something went wrong, try again later",
                 2000
               );
-
-              console.log(error);
-              console.log(response);
             }
           }
         );

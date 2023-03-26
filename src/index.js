@@ -57,7 +57,9 @@ bot.onText(/\/open_app/, async (msg) => {
 //Add yourself to TWA
 bot.onText(/\/add/, async (msg) => {
   const isPrivate = msg?.chat?.type === "private";
+  const commandMsgId = msg.message_id;
   const chatId = msg.chat.id;
+  await BotHelpers.deleteMessage(bot, chatId, commandMsgId, 500);
 
   if (isPrivate) {
     await BotHelpers.sendDelete(
@@ -90,10 +92,6 @@ bot.onText(/\/add/, async (msg) => {
   );
 
   await userController.addNewUser(bot, API_URL, preparedData, chatId);
-
-  setTimeout(() => {
-    bot.deleteMessage(chatId, msg.message_id);
-  }, 500);
 });
 
 bot.on("new_chat_members", async (msg) => {
@@ -123,38 +121,3 @@ bot.on("new_chat_members", async (msg) => {
     await userController.addNewUser(bot, API_URL, preparedData, chatId);
   });
 });
-
-// bot.onText(/\/getAllGroups/, async (msg) => {
-//   console.log(msg.from.id);
-
-//   const userId = msg.from.id;
-
-//   await bot.getUpdates().then((updates) => {
-//     const chats = new Set();
-
-//     for (const update of updates) {
-//       const message = update.message;
-//       if (message && message.chat) {
-//         const chatId = message.chat.id;
-//         chats.add(chatId);
-//       }
-//     }
-
-//     console.log(chats);
-
-//     const adminChats = [];
-//     for (const chatId of chats) {
-//       // Получаем информацию о пользователе в чате
-//       bot.getChatMember(chatId, userId).then((chatMember) => {
-//         if (
-//           chatMember.status === "administrator" ||
-//           chatMember.status === "creator"
-//         ) {
-//           adminChats.push(chatId);
-//         }
-//       });
-//     }
-
-//     console.log(adminChats);
-//   });
-// });
