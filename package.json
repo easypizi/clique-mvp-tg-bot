@@ -3,6 +3,7 @@
   "version": "1.0.0",
   "description": "",
   "main": "index.js",
+  "type": "module",
   "scripts": {
     "start": "node dist/index.js",
     "build": "babel src -d dist/src && babel index.js -d dist",
@@ -21,9 +22,10 @@
     "nodemon": "^2.0.21"
   },
   "dependencies": {
+    "body-parser": "^1.20.2",
     "dotenv": "^16.0.3",
+    "express": "^4.18.2",
     "node-telegram-bot-api": "^0.61.0",
-    "pm2": "^5.3.0",
     "request": "^2.88.2"
   }
 }

@@ -1,15 +1,40 @@
 import dotenv from "dotenv";
+import express from "express";
+import bodyParser from "body-parser";
 import TelegramBot from "node-telegram-bot-api";
+
 import UserController from "./src/controllers/UserController.js";
 import BotHelper from "./src/helpers/BotHelpers.js";
 import UserService from "./src/services/UserService.js";
 
 dotenv.config();
+const app = express();
+app.use(bodyParser.json());
+
+let server = app.listen(process.env.PORT, "0.0.0.0", () => {
+  const host = server.address().address;
+  const port = server.address().port;
+  console.log("Web server started at http://%s:%s", host, port);
+});
 
 const token = process.env.TG_BOT_TOKEN;
-const bot = new TelegramBot(token, { polling: true });
+let bot;
 const WEB_APP_URL = process.env.WEB_APP_URL;
 const API_URL = process.env.API_URL;
+
+if (process.env.NODE_ENV === "production") {
+  bot = new TelegramBot(token);
+  bot.setWebHook(process.env.HEROKU_URL + bot.token);
+} else {
+  bot = new TelegramBot(token, { polling: true });
+}
+
+app.post("/" + bot.token, (req, res) => {
+  bot.processUpdate(req.body);
+  res.sendStatus(200);
+});
+
+console.log("Bot server started in the " + process.env.NODE_ENV + " mode");
 
 bot.on("polling_error", (error) => {
   console.log(error.code); // => 'EFATAL'
