@@ -1,8 +1,8 @@
 import dotenv from "dotenv";
 import TelegramBot from "node-telegram-bot-api";
-import UserController from "./controllers/userController.js";
-import BotHelper from "./helpers/BotHelpers.js";
-import UserService from "./services/UserService.js";
+import UserController from "./src/controllers/UserController.js";
+import BotHelper from "./src/helpers/BotHelpers.js";
+import UserService from "./src/services/UserService.js";
 
 dotenv.config();
 

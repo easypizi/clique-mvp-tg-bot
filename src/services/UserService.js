@@ -19,7 +19,7 @@ class UserService {
     } catch (e) {
       await bot.sendMessage(
         chatId,
-        'Sorry, an error occurred during parsing of user data'
+        "Sorry, an error occurred during parsing of user data"
       );
     }
   }
@@ -30,7 +30,7 @@ class UserService {
       if (userProfilePhotos.total_count > 0) {
         const file = await bot.getFile(userProfilePhotos.photos[0][2].file_id);
         const photoUrl = `https://api.telegram.org/file/bot${token}/${file.file_path}`;
-        return photoUrl ?? '';
+        return photoUrl ?? "";
       } else {
         await bot
           .sendMessage(chatId, "User hasn't uploaded a profile photo")
@@ -43,7 +43,7 @@ class UserService {
     } catch (error) {
       await bot.sendMessage(
         chatId,
-        'Sorry, an error occurred during parsing of photo'
+        "Sorry, an error occurred during parsing of photo"
       );
     }
   }
@@ -59,8 +59,8 @@ class UserService {
       user_last_name: last_name,
       user_telegram_link: username,
       is_admin: admins.includes(id),
-      user_description: '',
-      user_image: userPhotoLink ?? '',
+      user_description: "",
+      user_image: userPhotoLink ?? "",
     };
   }
 }
