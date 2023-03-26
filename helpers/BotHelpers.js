@@ -37,11 +37,13 @@ class BotHelper {
     });
   }
 
-  async deleteMessage(bot, chatId, msgId, delay) {
+  async deleteMessage(bot, chatId, isPrivateChat, msgId, delay) {
     try {
-      const botRights = await this.checkBotRights(bot, chatId);
+      const isBotAvailable = !isPrivateChat
+        ? await this.checkBotRights(bot, chatId)
+        : true;
 
-      if (botRights.can_delete_messages) {
+      if (isBotAvailable && isBotAvailable.can_delete_messages) {
         setTimeout(() => {
           bot.deleteMessage(chatId, msgId);
         }, delay);

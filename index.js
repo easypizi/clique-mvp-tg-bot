@@ -59,7 +59,7 @@ bot.onText(/\/add/, async (msg) => {
   const isPrivate = msg?.chat?.type === "private";
   const commandMsgId = msg.message_id;
   const chatId = msg.chat.id;
-  await BotHelper.deleteMessage(bot, chatId, commandMsgId, 500);
+  await BotHelper.deleteMessage(bot, chatId, isPrivate, commandMsgId, 500);
 
   if (isPrivate) {
     await BotHelper.sendDelete(
