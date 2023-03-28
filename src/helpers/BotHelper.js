@@ -1,4 +1,20 @@
 class BotHelper {
+  async getChatIdByMessage(msg) {
+    return msg?.chat.id;
+  }
+
+  async getUserIdByMessage(msg) {
+    return msg?.from.id;
+  }
+
+  async getMsgId(msg) {
+    return msg?.message_id;
+  }
+
+  async isChatPrivate(msg) {
+    return msg?.chat?.type === "private";
+  }
+
   async checkBotRights(bot, chatId) {
     return bot
       .getChatAdministrators(chatId)
@@ -26,7 +42,7 @@ class BotHelper {
   }
 
   async send(bot, chatId, message, options) {
-    bot.sendMessage(chatId, message, ...options);
+    bot.sendMessage(chatId, message, options);
   }
 
   async sendDelete(bot, chatId, message, delay) {
@@ -41,7 +57,9 @@ class BotHelper {
     try {
       const isBotAvailable = !isPrivateChat
         ? await this.checkBotRights(bot, chatId)
-        : true;
+        : {
+            can_delete_messages: true,
+          };
 
       if (isBotAvailable && isBotAvailable.can_delete_messages) {
         setTimeout(() => {

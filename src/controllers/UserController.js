@@ -1,5 +1,5 @@
 import request from "request";
-import BotHelpers from "../helpers/BotHelpers.js";
+import BotHelper from "../helpers/BotHelper.js";
 
 class UserController {
   async addNewUser(bot, api_url, preparedData, chatId) {
@@ -11,14 +11,14 @@ class UserController {
           { json: preparedData },
           (error, response, body) => {
             if (!error && response.statusCode == 200) {
-              BotHelpers.sendDelete(
+              BotHelper.sendDelete(
                 bot,
                 chatId,
                 `Пользователь ${preparedData.user_telegram_link} добавлен в базу данных сообщества`,
                 2000
               );
             } else {
-              BotHelpers.sendDelete(
+              BotHelper.sendDelete(
                 bot,
                 chatId,
                 body?.message ?? "Something went wrong, try again later",

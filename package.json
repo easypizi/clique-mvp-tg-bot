@@ -25,6 +25,7 @@
   "dependencies": {
     "body-parser": "^1.20.2",
     "dotenv": "^16.0.3",
+    "effector": "^22.7.0",
     "express": "^4.18.2",
     "node-telegram-bot-api": "^0.61.0",
     "request": "^2.88.2"
