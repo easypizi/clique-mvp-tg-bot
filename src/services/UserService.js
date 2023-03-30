@@ -51,16 +51,17 @@ class UserService {
   async formatData(
     { id, first_name, last_name, username },
     userPhotoLink,
-    admins
+    chatId
   ) {
     return {
       user_id: id,
       user_name: first_name,
       user_last_name: last_name,
       user_telegram_link: username,
-      is_admin: admins.includes(id),
       user_description: "",
       user_image: userPhotoLink ?? "",
+      user_groups: [chatId],
+      is_visible: true,
     };
   }
 }

@@ -53,6 +53,16 @@ if (process.env.NODE_ENV === "production") {
   bot = new TelegramBot(token, { polling: true });
 }
 
+//POLLING ERRORS DETECTION;
+bot.on("polling_error", (error) => {
+  console.log(error.code); // => 'EFATAL'
+});
+
+//WEBHOOK ERRORS DETECTION:
+bot.on("webhook_error", (error) => {
+  console.log(error.code); // => 'EPARSE'
+});
+
 // CREATE SPACE
 bot.onText(/\/space/, async (msg) => {
   const chatId = await BotHelper.getChatIdByMessage(msg);
@@ -226,11 +236,11 @@ bot.onText(/\/add/, async (msg) => {
     chatId,
     token
   );
-  const groupAdmins = await UserService.getAdministrators(bot, chatId);
+
   const preparedData = await UserService.formatData(
     userData,
     userPhoto,
-    groupAdmins
+    chatId
   );
 
   await UserController.addNewUser(bot, API_URL, preparedData, chatId);
@@ -253,12 +263,7 @@ bot.on("new_chat_members", async (msg) => {
       chatId,
       token
     );
-    const groupAdmins = await UserService.getAdministrators(bot, chatId);
-    const preparedData = await UserService.formatData(
-      userData,
-      userPhoto,
-      groupAdmins
-    );
+    const preparedData = await UserService.formatData(userData, userPhoto);
 
     await UserController.addNewUser(bot, API_URL, preparedData, chatId);
   });
@@ -412,9 +417,4 @@ bot.on("callback_query", async (query) => {
       });
     }
   }
-});
-
-//POLLING ERRORS DETECTION;
-bot.on("polling_error", (error) => {
-  console.log(error.code); // => 'EFATAL'
 });
