@@ -1,17 +1,4 @@
 class UserService {
-  async getAdministrators(bot, chatId) {
-    try {
-      const result = await bot.getChatAdministrators(chatId);
-      const filteredResult = result.filter((data) => !data.user.is_bot);
-      return filteredResult.map((data) => data.user.id);
-    } catch (e) {
-      await bot.sendMessage(
-        chatId,
-        "Sorry, an error occurred during parsing of group's admins data"
-      );
-    }
-  }
-
   async getUserData(bot, chatId, userId) {
     try {
       const result = await bot.getChatMember(chatId, userId);
@@ -58,7 +45,6 @@ class UserService {
       user_name: first_name,
       user_last_name: last_name,
       user_telegram_link: username,
-      user_description: "",
       user_image: userPhotoLink ?? "",
       user_groups: [chatId],
       is_visible: true,

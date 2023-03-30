@@ -15,6 +15,40 @@ class BotHelper {
     return msg?.chat?.type === "private";
   }
 
+  async getChatData(bot, chatId) {
+    try {
+      const result = await bot.getChat(chatId);
+      return result;
+    } catch (error) {
+      await bot.sendMessage(
+        chatId,
+        "Sorry, an error occurred during parsing of group's data"
+      );
+    }
+  }
+
+  async getInviteLink(bot, chatId) {
+    try {
+      const result = await bot.exportChatInviteLink(chatId);
+      return result;
+    } catch (e) {
+      console.log(e);
+    }
+  }
+
+  async getAdministrators(bot, chatId) {
+    try {
+      const result = await bot.getChatAdministrators(chatId);
+      const filteredResult = result.filter((data) => !data.user.is_bot);
+      return filteredResult.map((data) => data.user.id);
+    } catch (e) {
+      await bot.sendMessage(
+        chatId,
+        "Sorry, an error occurred during parsing of group's admins data"
+      );
+    }
+  }
+
   async checkBotRights(bot, chatId) {
     return bot
       .getChatAdministrators(chatId)

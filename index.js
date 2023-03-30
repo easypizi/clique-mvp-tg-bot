@@ -1,5 +1,6 @@
 import dotenv from "dotenv";
 import express from "express";
+import md5 from "md5";
 import bodyParser from "body-parser";
 import TelegramBot from "node-telegram-bot-api";
 
@@ -7,17 +8,23 @@ import UserController from "./src/controllers/UserController.js";
 import BotHelper from "./src/helpers/BotHelper.js";
 import UserService from "./src/services/UserService.js";
 import StoreService from "./src/store/StoreService.js";
+import SpaceController from "./src/controllers/SpaceController.js";
+import SpaceService from "./src/services/SpaceService.js";
+import GroupService from "./src/services/GroupService.js";
+import GroupController from "./src/controllers/GroupController.js";
 
 dotenv.config();
 
+const BOT_NAME = "cliquetestingbot";
 const token = process.env.TG_BOT_TOKEN;
 const WEB_APP_URL = process.env.WEB_APP_URL;
 const API_URL = process.env.API_URL;
 
 const BOT_COMMANDS = {
   ADD_USER: "/add",
-  SPACE: "/space",
+  SPACE_CREATE: "/space_create",
   OPEN_APP: "/open_app",
+  SPACE_LOGIN: "/space_login",
 };
 
 const BOT_STATE_MANAGER_MAPPING = {
@@ -36,7 +43,7 @@ if (process.env.NODE_ENV === "production") {
   //SERVER FOR WEB HOOK
   const app = express();
   app.use(bodyParser.json());
-  bot = new TelegramBot(token);
+  bot = new TelegramBot(token, { group: true });
   bot.setWebHook(process.env.HEROKU_URL + bot.token);
   let server = app.listen(process.env.PORT, "0.0.0.0", () => {
     const host = server.address().address;
@@ -50,7 +57,7 @@ if (process.env.NODE_ENV === "production") {
 
   console.log("Bot server started in the " + process.env.NODE_ENV + " mode");
 } else {
-  bot = new TelegramBot(token, { polling: true });
+  bot = new TelegramBot(token, { polling: true, group: true });
 }
 
 //POLLING ERRORS DETECTION;
@@ -64,7 +71,7 @@ bot.on("webhook_error", (error) => {
 });
 
 // CREATE SPACE
-bot.onText(/\/space/, async (msg) => {
+bot.onText(/\/space_create/, async (msg) => {
   const chatId = await BotHelper.getChatIdByMessage(msg);
   const commandMsgId = await BotHelper.getMsgId(msg);
   const isPrivate = await BotHelper.isChatPrivate(msg);
@@ -92,16 +99,17 @@ bot.onText(/\/space/, async (msg) => {
     return;
   }
 
-  const { community_data } = await StoreService.getStoreState(chatId);
+  const space = await SpaceController.getSpace(API_URL, chatId);
 
-  if (!community_data.id) {
+  if (!space) {
     await BotHelper.send(
       bot,
       chatId,
       `Looks like you are not managing any community. Please follow instructions to create one.\n\nProvide community name: `
     );
   } else {
-    const { community_data } = await StoreService.getStoreState(chatId);
+    const { space_name } = space;
+
     const inlineKeyboard = {
       inline_keyboard: [
         [
@@ -119,13 +127,14 @@ bot.onText(/\/space/, async (msg) => {
     await BotHelper.send(
       bot,
       chatId,
-      `You already managing ${community_data.name} community. Do you want to edit it or delete?`,
+      `You already managing "${space_name}" community. Do you want to edit it or delete?`,
       {
         reply_markup: inlineKeyboard,
       }
     );
   }
 });
+
 // OPEN APP
 bot.onText(/\/open_app/, async (msg) => {
   const chatId = await BotHelper.getChatIdByMessage(msg);
@@ -154,25 +163,37 @@ bot.onText(/\/open_app/, async (msg) => {
   await BotHelper.deleteMessage(bot, chatId, isPrivate, commandMsgId, 500);
   try {
     if (isPrivate) {
-      await bot.sendMessage(chatId, "Click below to open the app: ", {
-        reply_markup: {
-          inline_keyboard: [
-            [
-              {
-                text: "Open app",
-                web_app: { url: `${WEB_APP_URL}?user=${userId}` },
-              },
+      const userData = await UserController.getUser(API_URL, userId);
+      const loginData = userData[0].user_bot_chat_id ?? "";
+      await bot
+        .sendMessage(chatId, "Click below to open the app: ", {
+          reply_markup: {
+            inline_keyboard: [
+              [
+                {
+                  text: "Open app",
+                  web_app: {
+                    url: `${WEB_APP_URL}?user_id=${userId}&private_id=${loginData}`,
+                  },
+                },
+              ],
             ],
-          ],
-        },
-      });
+          },
+        })
+        .then((sentMsg) => {
+          bot.pinChatMessage(chatId, sentMsg.message_id);
+        });
     } else {
-      // TODO: Provide userId as a query param to parse it inside the TWA
       await bot
         .sendMessage(chatId, "We are welcome you! Click on the link below: ", {
           reply_markup: {
             inline_keyboard: [
-              [{ text: "Open app", url: `${WEB_APP_URL}?user=${userId}` }],
+              [
+                {
+                  text: "Open personal space app: ",
+                  url: `${WEB_APP_URL}?user_id=${userId}`,
+                },
+              ],
             ],
           },
         })
@@ -188,10 +209,10 @@ bot.onText(/\/open_app/, async (msg) => {
 });
 //ADD NEW USER TO COMMUNITY
 bot.onText(/\/add/, async (msg) => {
-  const userId = msg.from.id;
-  const isPrivate = msg?.chat?.type === "private";
-  const commandMsgId = msg.message_id;
-  const chatId = msg.chat.id;
+  const chatId = await BotHelper.getChatIdByMessage(msg);
+  const commandMsgId = await BotHelper.getMsgId(msg);
+  const isPrivate = await BotHelper.isChatPrivate(msg);
+  const userId = await BotHelper.getUserIdByMessage(msg);
 
   const storeState = await StoreService.getStoreState(chatId);
   const isProcessing = storeState.current_state;
@@ -237,24 +258,126 @@ bot.onText(/\/add/, async (msg) => {
     token
   );
 
-  const preparedData = await UserService.formatData(
-    userData,
-    userPhoto,
-    chatId
-  );
+  const isUserExists = await UserController.checkUserExistence(API_URL, userId);
 
-  await UserController.addNewUser(bot, API_URL, preparedData, chatId);
+  if (isUserExists) {
+    const preparedData = await UserService.formatData(
+      userData,
+      userPhoto,
+      chatId
+    );
+    await UserController.UpdateUserData(bot, API_URL, preparedData, chatId);
+  } else {
+    const preparedData = await UserService.formatData(
+      userData,
+      userPhoto,
+      chatId
+    );
+    await UserController.addNewUser(bot, API_URL, preparedData, chatId);
+  }
 });
+
+// User authentification in community space
+bot.onText(/\/space_login/, async (msg) => {
+  const chatId = await BotHelper.getChatIdByMessage(msg);
+  const commandMsgId = await BotHelper.getMsgId(msg);
+  const isPrivate = await BotHelper.isChatPrivate(msg);
+  const userId = await BotHelper.getUserIdByMessage(msg);
+  const storeState = await StoreService.getStoreState(chatId);
+  const isProcessing = storeState.current_state;
+  const lastCommand = storeState.last_command;
+
+  await BotHelper.deleteMessage(bot, chatId, isPrivate, commandMsgId, 500);
+
+  if (isProcessing) {
+    await BotHelper.send(
+      bot,
+      chatId,
+      `Finish previous operation before pulling this command. Previous operation was: ${lastCommand}`
+    );
+
+    await StoreService.updateCurrentState(
+      chatId,
+      BOT_STATE_MANAGER_MAPPING.DEFAULT
+    );
+    return;
+  }
+
+  if (!isPrivate) {
+    await BotHelper.sendDelete(
+      bot,
+      chatId,
+      "If you want login in the community space, please call this command in the private chat with this bot",
+      5000
+    );
+
+    setTimeout(() => {
+      bot.deleteMessage(chatId, msg.message_id);
+    }, 500);
+
+    return;
+  }
+
+  await StoreService.updateLastCommand(chatId, BOT_COMMANDS.SPACE_LOGIN);
+  const isUserExists = await UserController.checkUserExistence(API_URL, userId);
+
+  if (isUserExists) {
+    const updateData = {
+      user_id: userId,
+      user_bot_chat_id: md5(chatId),
+    };
+    await UserController.UpdateUserData(bot, API_URL, updateData);
+    await BotHelper.send(
+      bot,
+      chatId,
+      `You succesfully logined! \nPlease, run ${BOT_COMMANDS.OPEN_APP} command, to open application`
+    );
+  } else {
+    await BotHelper.send(
+      bot,
+      chatId,
+      `Before login in the space please call\n${BOT_COMMANDS.ADD_USER}\ncommand in the chat, which was included in the community, and after that try again to call command ${BOT_COMMANDS.SPACE_LOGIN}`
+    );
+  }
+});
+
+//Update group link
+bot.on("my_chat_member", async (message) => {
+  const chatId = message.chat.id;
+  const isAdmin = message.new_chat_member.status === "administrator";
+  const currentGroup = await GroupController.getGroup(API_URL, chatId);
+
+  if (isAdmin && !currentGroup.group_link) {
+    const { group_id } = currentGroup;
+    const inviteLink = await BotHelper.getInviteLink(bot, chatId);
+    await GroupController.UpdateGroupData(bot, API_URL, {
+      group_id,
+      group_link: inviteLink,
+    });
+  }
+});
+
 //ADD NEW USERS TO COMMUNITY AUTOMATICALLY ON ADDING TO THE ANY CHATS
 bot.on("new_chat_members", async (msg) => {
   const chatId = msg.chat.id;
   const newMembers = msg.new_chat_members;
 
   newMembers.forEach(async (member) => {
-    if (member.is_bot) {
+    // Parsing group data when bot were added to the new group;
+    if (member.is_bot && member.username === BOT_NAME) {
+      const chatData = await BotHelper.getChatData(bot, chatId);
+      const groupAdmins = await BotHelper.getAdministrators(bot, chatId);
+      const preparedData = await GroupService.formatData({
+        id: chatData.id,
+        name: chatData.title,
+        link: chatData.username ? `https://t.me/${chatData.username}` : null,
+        admins: groupAdmins,
+      });
+      await GroupController.addNewGroup(bot, API_URL, preparedData, chatId);
       return;
     }
 
+    // Parsing new user data, when user joins to the community;
     const userId = member.id;
     const userData = await UserService.getUserData(bot, chatId, userId);
     const userPhoto = await UserService.getUserProfilePhotos(
@@ -263,23 +386,47 @@ bot.on("new_chat_members", async (msg) => {
       chatId,
       token
     );
-    const preparedData = await UserService.formatData(userData, userPhoto);
 
-    await UserController.addNewUser(bot, API_URL, preparedData, chatId);
+    const isUserExists = await UserController.checkUserExistence(
+      API_URL,
+      userId
+    );
+
+    if (isUserExists) {
+      const preparedData = await UserService.formatData(
+        userData,
+        userPhoto,
+        chatId
+      );
+      await UserController.UpdateUserData(bot, API_URL, preparedData, chatId);
+    } else {
+      const preparedData = await UserService.formatData(
+        userData,
+        userPhoto,
+        chatId
+      );
+      await UserController.addNewUser(bot, API_URL, preparedData, chatId);
+    }
   });
 });
 
 //ALL INLINE MESSAGES HANDLER
 bot.on("message", async (msg) => {
-  const isCommand = msg.text.startsWith("/");
+  const isCommand = msg.pinned_message
+    ? msg?.pinned_message?.text.startsWith("/")
+    : msg?.text?.startsWith("/");
+  const isPinnedMessage = msg?.pinned_message;
+
   const chatId = await BotHelper.getChatIdByMessage(msg);
   const { current_state: currentState } = await StoreService.getStoreState(
     chatId
   );
 
+  // Create space name
   if (
     currentState === BOT_STATE_MANAGER_MAPPING.CREATE_SPACE_INIT &&
-    !isCommand
+    !isCommand &&
+    !isPinnedMessage
   ) {
     const { community_data } = await StoreService.getStoreState(chatId);
     if (!community_data.name) {
@@ -296,9 +443,11 @@ bot.on("message", async (msg) => {
     }
   }
 
+  // Create space description
   if (
     currentState === BOT_STATE_MANAGER_MAPPING.CREATE_SPACE_EDIT_NAME &&
-    !isCommand
+    !isCommand &&
+    !isPinnedMessage
   ) {
     const { community_data } = await StoreService.getStoreState(chatId);
 
@@ -344,77 +493,128 @@ bot.on("message", async (msg) => {
 // INLINE MARKUP QUERY RESPONSE
 bot.on("callback_query", async (query) => {
   const chatId = query.message.chat.id;
+  const userId = query.from.id;
   const msgId = query.message.message_id;
-  const { community_data } = await StoreService.getStoreState(chatId);
 
-  if (community_data.name && community_data.description) {
-    if (query.data === "yes") {
-      await BotHelper.deleteMessage(bot, chatId, true, msgId, 500);
+  if (query.data === "yes") {
+    await BotHelper.deleteMessage(bot, chatId, true, msgId, 500);
+    const space = await SpaceController.getSpace(API_URL, chatId);
 
-      bot.answerCallbackQuery(query.id, {
-        text: `Your ${community_data.name} space was succesfully created!`,
-      });
-
-      await StoreService.updateCurrentState(
-        chatId,
-        BOT_STATE_MANAGER_MAPPING.DEFAULT
-      );
+    if (!space) {
+      await StoreService.updateCommunityId(chatId, chatId);
       const { community_data: data } = await StoreService.getStoreState(chatId);
+      const preparedData = await SpaceService.formatData(data, userId);
+      await SpaceController.addNewSpace(bot, API_URL, preparedData, chatId);
+      bot.answerCallbackQuery(query.id, {
+        text: `Your ${data.name} space was succesfully created!`,
+      });
+    } else {
+      const { space_id, space_owner_id } = space;
+      await StoreService.updateCommunityId(chatId, space_id);
+      const { community_data: data } = await StoreService.getStoreState(chatId);
+      const preparedData = await SpaceService.formatData(data, space_owner_id);
+      await SpaceController.UpdateSpaceData(bot, API_URL, preparedData, chatId);
+      bot.answerCallbackQuery(query.id, {
+        text: `Your ${data.name} space was succesfully updated!`,
+      });
+    }
 
-      if (!data.id) {
-        await StoreService.updateCommunityId(chatId, chatId);
+    await StoreService.updateCommunityName(chatId, null);
+    await StoreService.updateCommunityDescription(chatId, null);
+    await StoreService.updateCommunityId(chatId, null);
+    await StoreService.updateCurrentState(
+      chatId,
+      BOT_STATE_MANAGER_MAPPING.DEFAULT
+    );
+  }
+
+  if (query.data === "no") {
+    bot.editMessageText(
+      `Please provide community data again with command /space_create.`,
+      {
+        chat_id: chatId,
+        message_id: query.message.message_id,
       }
+    );
 
-      //TODO: send data to backend
-    }
+    bot.answerCallbackQuery(query.id, {
+      text: "Community space was not created. Please try again",
+    });
 
-    if (query.data === "no") {
-      bot.editMessageText(
-        `Please provide community data again with command /space.`,
-        {
-          chat_id: chatId,
-          message_id: query.message.message_id,
-        }
-      );
+    await BotHelper.deleteMessage(bot, chatId, true, msgId, 500);
+    await StoreService.updateCommunityName(chatId, null);
+    await StoreService.updateCommunityDescription(chatId, null);
+    await StoreService.updateCommunityId(chatId, null);
+    await StoreService.updateCurrentState(
+      chatId,
+      BOT_STATE_MANAGER_MAPPING.DEFAULT
+    );
+  }
 
-      bot.answerCallbackQuery(query.id, {
-        text: "Community space was not created. Please try again",
-      });
+  if (query.data === "edit_community_data") {
+    await StoreService.updateCurrentState(
+      chatId,
+      BOT_STATE_MANAGER_MAPPING.CREATE_SPACE_INIT
+    );
+    await BotHelper.send(bot, chatId, "Provide updated community name: ");
+    await StoreService.updateCommunityName(chatId, null);
+    await StoreService.updateCommunityDescription(chatId, null);
+    await StoreService.updateCommunityId(chatId, null);
+    await BotHelper.deleteMessage(bot, chatId, true, msgId, 500);
+  }
 
-      await BotHelper.deleteMessage(bot, chatId, true, msgId, 500);
+  if (query.data === "delete_community") {
+    const inlineKeyboard = {
+      inline_keyboard: [
+        [
+          {
+            text: "I'm sure, DELETE",
+            callback_data: "delete_forever",
+          },
+          {
+            text: "CANCEL",
+            callback_data: "cancel_operation",
+          },
+        ],
+      ],
+    };
+    await BotHelper.send(
+      bot,
+      chatId,
+      `ARE YOU SURE THAT YOU WANT DELETE YOUR SPACE?`,
+      {
+        reply_markup: inlineKeyboard,
+      }
+    );
+  }
 
-      await StoreService.updateCommunityName(chatId, null);
-      await StoreService.updateCommunityDescription(chatId, null);
-      await StoreService.updateCurrentState(
-        chatId,
-        BOT_STATE_MANAGER_MAPPING.DEFAULT
-      );
-    }
+  if (query.data === "delete_forever") {
+    await StoreService.updateCommunityId(chatId, null);
+    await StoreService.updateCommunityName(chatId, null);
+    await StoreService.updateCommunityDescription(chatId, null);
 
-    if (query.data === "edit_community_data") {
-      await StoreService.updateCurrentState(
-        chatId,
-        BOT_STATE_MANAGER_MAPPING.CREATE_SPACE_INIT
-      );
-      await BotHelper.send(bot, chatId, "Provide updated community name: ");
-      await StoreService.updateCommunityName(chatId, null);
-      await StoreService.updateCommunityDescription(chatId, null);
-      await BotHelper.deleteMessage(bot, chatId, true, msgId, 500);
-    }
+    await BotHelper.deleteMessage(bot, chatId, true, msgId, 5000);
 
-    if (query.data === "delete_community") {
-      await StoreService.updateCommunityId(chatId, null);
-      await StoreService.updateCommunityName(chatId, null);
-      await StoreService.updateCommunityDescription(chatId, null);
-      await BotHelper.deleteMessage(bot, chatId, true, msgId, 500);
-      //TODO: send data to Backend;
-      await StoreService.updateCurrentState(
-        chatId,
-        BOT_STATE_MANAGER_MAPPING.DEFAULT
-      );
-      bot.answerCallbackQuery(query.id, {
-        text: "Community space was deleted",
-      });
-    }
+    await SpaceController.DeleteSpace(bot, API_URL, chatId, chatId);
+    await StoreService.updateCurrentState(
+      chatId,
+      BOT_STATE_MANAGER_MAPPING.DEFAULT
+    );
+    bot.answerCallbackQuery(query.id, {
+      text: "Community space was deleted",
+    });
+  } else if (query.data === "cancel_operation") {
+    await BotHelper.deleteMessage(bot, chatId, true, msgId, 5000);
+
+    await StoreService.updateCurrentState(
+      chatId,
+      BOT_STATE_MANAGER_MAPPING.DEFAULT
+    );
+    await BotHelper.sendDelete(
+      bot,
+      chatId,
+      "Ok, your space still exists. Just open app to manage it",
+      3000
+    );
   }
 });
