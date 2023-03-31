@@ -15,6 +15,7 @@ class StoreService {
         id: null,
       },
     });
+
     this.stores[chatId] = botStore;
 
     return botStore;

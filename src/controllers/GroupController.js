@@ -14,7 +14,7 @@ class GroupController {
               BotHelper.sendDelete(
                 bot,
                 chatId,
-                `Group ${preparedData.space_name} succesfully added to db!`,
+                `Group ${preparedData.group_name} succesfully added to db!`,
                 2000
               );
             } else {
@@ -46,7 +46,7 @@ class GroupController {
                 BotHelper.sendDelete(
                   bot,
                   chatId,
-                  `Group ${preparedData.space_name} was succesfully updated!`,
+                  `Group ${preparedData.group_name} was succesfully updated!`,
                   2000
                 );
               } else {
@@ -86,7 +86,7 @@ class GroupController {
         });
       });
     } catch (error) {
-      console.log(`Error during parsing data from space DB on API`);
+      console.log(`Error during parsing data from Group DB on API`);
     }
   }
 }

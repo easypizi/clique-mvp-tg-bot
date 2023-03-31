@@ -1,5 +1,6 @@
 import request from "request";
 import BotHelper from "../helpers/BotHelper.js";
+import { BOT_COMMANDS, DELAY_DELETE } from "../const.js";
 
 class UserController {
   async addNewUser(bot, api_url, preparedData, chatId) {
@@ -14,15 +15,15 @@ class UserController {
               BotHelper.sendDelete(
                 bot,
                 chatId,
-                `User ${preparedData.user_telegram_link} succesfully added!`,
-                2000
+                `User ${preparedData.user_telegram_link} data succesfully added!`,
+                DELAY_DELETE.AFTER_2_SEC
               );
             } else {
               BotHelper.sendDelete(
                 bot,
                 chatId,
                 body?.message ?? "Something went wrong, try again later",
-                2000
+                DELAY_DELETE.AFTER_2_SEC
               );
             }
           }
@@ -44,8 +45,10 @@ class UserController {
           reject(new Error(`Unexpected status code: ${response.statusCode}`));
         } else {
           const data = JSON.parse(body);
-          if (data.length > 0) {
-            resolve(data);
+          if (data && data.length > 0) {
+            resolve(data[0]);
+          } else {
+            resolve(null);
           }
         }
       });
@@ -86,15 +89,15 @@ class UserController {
                 BotHelper.sendDelete(
                   bot,
                   chatId,
-                  `User ${preparedData.user_telegram_link} data succesfully updated!`,
-                  2000
+                  `You succesfully logined! \nPlease, run ${BOT_COMMANDS.OPEN_APP} command, to open application`,
+                  DELAY_DELETE.AFTER_5_SEC
                 );
               } else {
                 BotHelper.sendDelete(
                   bot,
                   chatId,
                   body?.message ?? "Something went wrong, try again later",
-                  2000
+                  DELAY_DELETE.AFTER_2_SEC
                 );
               }
             }
