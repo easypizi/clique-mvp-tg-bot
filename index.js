@@ -235,6 +235,12 @@ bot.on("my_chat_member", async (msg) => {
   const currentGroup = await GroupController.getGroup(API_URL, chatId);
 
   if (isAdmin) {
+    setTimeout(() => {
+      console.log(
+        "Small delay for telegram API response and checking bot rights"
+      );
+    }, DELAY_DELETE.AFTER_2_SEC);
+
     if (!currentGroup) {
       await BotHelper.sendDelete(
         bot,
@@ -242,13 +248,6 @@ bot.on("my_chat_member", async (msg) => {
         "Parsing data...",
         DELAY_DELETE.AFTER_2_SEC
       );
-
-      setTimeout(() => {
-        console.log(
-          "Small delay for telegram API response and checking bot rights"
-        );
-      }, DELAY_DELETE.AFTER_2_SEC);
-
       const chatData = await BotHelper.getChatData(bot, chatId);
       const groupAdmins = await BotHelper.getAdministrators(bot, chatId);
       const inviteLink = await BotHelper.getInviteLink(bot, chatId);
@@ -262,6 +261,12 @@ bot.on("my_chat_member", async (msg) => {
       });
       await GroupController.addNewGroup(bot, API_URL, preparedData, chatId);
     } else {
+      await BotHelper.sendDelete(
+        bot,
+        chatId,
+        "Parsing data...",
+        DELAY_DELETE.AFTER_2_SEC
+      );
       const { group_id } = currentGroup;
       const inviteLink = await BotHelper.getInviteLink(bot, chatId);
       await GroupController.UpdateGroupData(bot, API_URL, {
@@ -387,6 +392,15 @@ bot.onText(/\/open_app/, async (msg) => {
 bot.onText(/\/help/, async (msg) => {
   const isPrivate = await BotHelper.isChatPrivate(msg);
   const chatId = await BotHelper.getChatIdByMessage(msg);
+  const msgId = await BotHelper.getMsgId(msg);
+
+  await BotHelper.deleteMessage(
+    bot,
+    chatId,
+    isPrivate,
+    msgId,
+    DELAY_DELETE.IMMEDIATELY
+  );
 
   const helpText = `/help - show all available commands\n/space_create - create your own space\n/add - add yourself to the space (active in workchat)\n/space_login - authorize in community space\n/open_app - get personal link to the space`;
 
