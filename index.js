@@ -215,7 +215,7 @@ bot.onText(/\/space_login/, async (msg) => {
   if (isUserExists) {
     const updateData = {
       user_id: userId,
-      user_bot_chat_id: md5(chatId),
+      user_bot_chat_id: md5(chatId.toString()),
     };
     await UserController.UpdateUserData(bot, API_URL, updateData, chatId);
   } else {
