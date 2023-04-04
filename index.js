@@ -233,6 +233,7 @@ bot.on("my_chat_member", async (msg) => {
   const isAdmin = msg.new_chat_member.status === "administrator";
   const chatId = await BotHelper.getChatIdByMessage(msg);
   const currentGroup = await GroupController.getGroup(API_URL, chatId);
+  const chatType = msg.chat.type;
 
   if (isAdmin) {
     setTimeout(() => {
@@ -258,6 +259,7 @@ bot.on("my_chat_member", async (msg) => {
           ? `https://t.me/${chatData.username}`
           : inviteLink,
         admins: groupAdmins,
+        type: chatType,
       });
       await GroupController.addNewGroup(bot, API_URL, preparedData, chatId);
     } else {
