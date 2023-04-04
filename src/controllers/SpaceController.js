@@ -13,8 +13,8 @@ class SpaceController {
             reject(new Error(`Unexpected status code: ${response.statusCode}`));
           } else {
             const data = JSON.parse(body);
-            if (data.length > 0) {
-              resolve(data[0]);
+            if (data) {
+              resolve(data);
             } else {
               resolve(null);
             }

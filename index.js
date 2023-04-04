@@ -4,14 +4,17 @@ import md5 from "md5";
 import bodyParser from "body-parser";
 import TelegramBot from "node-telegram-bot-api";
 
-import UserController from "./src/controllers/UserController.js";
 import BotHelper from "./src/helpers/BotHelper.js";
+
 import UserService from "./src/services/UserService.js";
-import StoreService from "./src/store/StoreService.js";
-import SpaceController from "./src/controllers/SpaceController.js";
 import SpaceService from "./src/services/SpaceService.js";
+import StoreService from "./src/store/StoreService.js";
 import GroupService from "./src/services/GroupService.js";
+
+import UserController from "./src/controllers/UserController.js";
+import SpaceController from "./src/controllers/SpaceController.js";
 import GroupController from "./src/controllers/GroupController.js";
+
 import {
   DELAY_DELETE,
   BOT_COMMANDS,
@@ -86,7 +89,7 @@ bot.onText(/\/space_create/, async (msg) => {
   const space = await SpaceController.getSpace(API_URL, chatId);
 
   if (!space) {
-    //SETUP CONFIG IN STORE FOR STEPS
+    //SETUP CONFIG IN STORE FOR PROPER STEPS
     await StoreService.updateCurrentState(
       chatId,
       BOT_STATE_MANAGER_MAPPING.CREATE_SPACE_INIT
@@ -97,7 +100,7 @@ bot.onText(/\/space_create/, async (msg) => {
       `Looks like you are not managing any community. Please follow instructions to create one.\n\nProvide community name: `
     );
   } else {
-    const { space_name } = space;
+    const { spaceName } = space;
     const inlineKeyboard = {
       inline_keyboard: [
         [
@@ -115,7 +118,7 @@ bot.onText(/\/space_create/, async (msg) => {
     await BotHelper.send(
       bot,
       chatId,
-      `You already managing "${space_name}" community.\n\nDo you want to edit it or delete?`,
+      `You already managing "${spaceName}" community.\n\nDo you want to edit it or delete?`,
       {
         reply_markup: inlineKeyboard,
       }
@@ -508,10 +511,10 @@ bot.on("callback_query", async (query) => {
         text: `Your ${data.name} space was succesfully created!`,
       });
     } else {
-      const { space_id, space_owner_id } = space;
-      await StoreService.updateCommunityId(chatId, space_id);
+      const { spaceId, spaceOwner } = space;
+      await StoreService.updateCommunityId(chatId, spaceId);
       const { community_data: data } = await StoreService.getStoreState(chatId);
-      const preparedData = await SpaceService.formatData(data, space_owner_id);
+      const preparedData = await SpaceService.formatData(data, spaceOwner);
       await SpaceController.UpdateSpaceData(bot, API_URL, preparedData, chatId);
       bot.answerCallbackQuery(query.id, {
         text: `Your ${data.name} space was succesfully updated!`,

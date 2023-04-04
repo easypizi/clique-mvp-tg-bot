@@ -77,7 +77,7 @@ class GroupController {
             reject(new Error(`Unexpected status code: ${response.statusCode}`));
           } else {
             const data = JSON.parse(body);
-            if (data.length > 0) {
+            if (data && data.length > 0) {
               resolve(data[0]);
             } else {
               resolve(null);
