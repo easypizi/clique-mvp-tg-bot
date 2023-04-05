@@ -304,7 +304,8 @@ bot.on("new_chat_members", async (msg) => {
       bot,
       userId,
       chatId,
-      token
+      token,
+      userName
     );
     const isUserExists = await UserController.checkUserExistence(
       API_URL,
