@@ -2,7 +2,7 @@ import { DELAY_DELETE } from "../const.js";
 import BotHelper from "../helpers/BotHelper.js";
 
 class UserService {
-  async getUserData(bot, chatId, userId, userName) {
+  async parseUserFromChat(bot, chatId, userId, userName) {
     try {
       const result = await bot.getChatMember(chatId, userId);
       return result.user;
@@ -17,7 +17,7 @@ class UserService {
     }
   }
 
-  async getUserProfilePhotos(bot, userId, chatId, token, userName) {
+  async parseUserProfilePhotos(bot, userId, chatId, token, userName) {
     try {
       const userProfilePhotos = await bot.getUserProfilePhotos(userId);
       if (userProfilePhotos.total_count > 0) {
@@ -42,17 +42,42 @@ class UserService {
   async formatData(
     { id, first_name, last_name, username },
     userPhotoLink,
-    chatId
+    chatId,
+    userFromDb
   ) {
-    return {
+    const userUpdateFields = {
       user_id: id,
-      user_name: first_name,
-      user_last_name: last_name,
-      user_telegram_link: username,
-      user_image: userPhotoLink ?? "",
       user_groups: [chatId.toString()],
-      is_visible: true,
     };
+
+    if (!userFromDb) {
+      return {
+        ...userUpdateFields,
+        user_name: first_name,
+        user_last_name: last_name,
+        user_telegram_link: username,
+        user_image: userPhotoLink,
+        is_visible: true,
+      };
+    }
+
+    if (first_name && !userFromDb["user_name"]) {
+      userUpdateFields["user_name"] = first_name;
+    }
+
+    if (last_name && !userFromDb["user_last_name"]) {
+      userUpdateFields["user_last_name"] = last_name;
+    }
+
+    if (username && !userFromDb["user_telegram_link"]) {
+      userUpdateFields["user_telegram_link"] = username;
+    }
+
+    if (userPhotoLink && !userFromDb["user_image"]) {
+      userUpdateFields["user_image"] = userPhotoLink;
+    }
+
+    return userUpdateFields;
   }
 }
 

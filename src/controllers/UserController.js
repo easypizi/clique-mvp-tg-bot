@@ -55,27 +55,6 @@ class UserController {
     });
   }
 
-  async checkUserExistence(api_url, userId) {
-    const get_user_endpoint = `${api_url}/user/${userId}`;
-
-    return new Promise((resolve, reject) => {
-      request.get(get_user_endpoint, (error, response, body) => {
-        if (error) {
-          reject(error);
-        } else if (response.statusCode !== 200) {
-          reject(new Error(`Unexpected status code: ${response.statusCode}`));
-        } else {
-          const data = JSON.parse(body);
-          if (data.length > 0) {
-            resolve(true);
-          } else {
-            resolve(false);
-          }
-        }
-      });
-    });
-  }
-
   async UpdateUserData(bot, api_url, preparedData, chatId) {
     if (preparedData.user_id) {
       try {

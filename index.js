@@ -63,172 +63,197 @@ bot.on("webhook_error", (error) => {
 
 // CREATING COMMUNITY SPACE
 bot.onText(/\/space_create/, async (msg) => {
-  const chatId = await BotHelper.getChatIdByMessage(msg);
-  const commandMsgId = await BotHelper.getMsgId(msg);
-  const isPrivate = await BotHelper.isChatPrivate(msg);
-  await BotHelper.deleteMessage(
-    bot,
-    chatId,
-    isPrivate,
-    commandMsgId,
-    DELAY_DELETE.IMMEDIATELY
-  );
-
-  // CHECK THAT THIS ACTION DOESN'T CALLED INSIDE CHAT
-  if (!isPrivate) {
-    await BotHelper.sendDelete(
+  if (
+    msg.text === "/space_create" ||
+    msg.text === `/space_create@${BOT_NAME}`
+  ) {
+    const chatId = await BotHelper.getChatIdByMessage(msg);
+    const commandMsgId = await BotHelper.getMsgId(msg);
+    const isPrivate = await BotHelper.isChatPrivate(msg);
+    await BotHelper.deleteMessage(
       bot,
       chatId,
-      `If you want create new space for community, please send\n${BOT_COMMANDS.SPACE_CREATE}\n command to the bot\nhttps://t.me/${BOT_NAME}\nin private messages`,
-      DELAY_DELETE.AFTER_5_SEC
+      isPrivate,
+      commandMsgId,
+      DELAY_DELETE.IMMEDIATELY
     );
-    return;
-  }
 
-  await StoreService.updateLastCommand(chatId, BOT_COMMANDS.SPACE_CREATE);
-  const space = await SpaceController.getSpace(API_URL, chatId);
+    // CHECK THAT THIS ACTION DOESN'T CALLED INSIDE CHAT
+    if (!isPrivate) {
+      await BotHelper.sendDelete(
+        bot,
+        chatId,
+        `If you want create new space for community, please send\n${BOT_COMMANDS.SPACE_CREATE}\n command to the bot\nhttps://t.me/${BOT_NAME}\nin private messages`,
+        DELAY_DELETE.AFTER_5_SEC
+      );
+      return;
+    }
 
-  if (!space) {
-    //SETUP CONFIG IN STORE FOR PROPER STEPS
-    await StoreService.updateCurrentState(
-      chatId,
-      BOT_STATE_MANAGER_MAPPING.CREATE_SPACE_INIT
-    );
-    await BotHelper.send(
-      bot,
-      chatId,
-      `Looks like you are not managing any community. Please follow instructions to create one.\n\nProvide community name: `
-    );
-  } else {
-    const { spaceName } = space;
-    const inlineKeyboard = {
-      inline_keyboard: [
-        [
-          {
-            text: "⚙️ EDIT",
-            callback_data: "edit_community_data",
-          },
-          {
-            text: "🔪 DELETE",
-            callback_data: "delete_community",
-          },
+    await StoreService.updateLastCommand(chatId, BOT_COMMANDS.SPACE_CREATE);
+    const space = await SpaceController.getSpace(API_URL, chatId);
+
+    if (!space) {
+      //SETUP CONFIG IN STORE FOR PROPER STEPS
+      await StoreService.updateCurrentState(
+        chatId,
+        BOT_STATE_MANAGER_MAPPING.CREATE_SPACE_INIT
+      );
+      await BotHelper.send(
+        bot,
+        chatId,
+        `Looks like you are not managing any community. Please follow instructions to create one.\n\nProvide community name: `
+      );
+    } else {
+      const { spaceName } = space;
+      const inlineKeyboard = {
+        inline_keyboard: [
+          [
+            {
+              text: "⚙️ EDIT",
+              callback_data: "edit_community_data",
+            },
+            {
+              text: "🔪 DELETE",
+              callback_data: "delete_community",
+            },
+          ],
         ],
-      ],
-    };
-    await BotHelper.send(
-      bot,
-      chatId,
-      `You already managing "${spaceName}" community.\n\nDo you want to edit it or delete?`,
-      {
-        reply_markup: inlineKeyboard,
-      }
-    );
+      };
+      await BotHelper.send(
+        bot,
+        chatId,
+        `You already managing "${spaceName}" community.\n\nDo you want to edit it or delete?`,
+        {
+          reply_markup: inlineKeyboard,
+        }
+      );
+    }
+  } else {
+    return;
   }
 });
 
 //ADDING NEW USER TO COMMUNITY
 bot.onText(/\/add/, async (msg) => {
-  const userName = msg.from.username;
-  const chatId = await BotHelper.getChatIdByMessage(msg);
-  const commandMsgId = await BotHelper.getMsgId(msg);
-  const isPrivate = await BotHelper.isChatPrivate(msg);
-  const userId = await BotHelper.getUserIdByMessage(msg);
+  if (msg.text === "/add" || msg.text === `/add@${BOT_NAME}`) {
+    const userName = msg.from.username;
+    const chatId = await BotHelper.getChatIdByMessage(msg);
+    const commandMsgId = await BotHelper.getMsgId(msg);
+    const isPrivate = await BotHelper.isChatPrivate(msg);
+    const userId = await BotHelper.getUserIdByMessage(msg);
 
-  await BotHelper.deleteMessage(
-    bot,
-    chatId,
-    isPrivate,
-    commandMsgId,
-    DELAY_DELETE.IMMEDIATELY
-  );
-
-  if (isPrivate) {
-    await BotHelper.sendDelete(
+    await BotHelper.deleteMessage(
       bot,
       chatId,
-      "If you want to add yourself to any community, please register yourself once – send the command\n/add\nin the chat of that community.",
-      DELAY_DELETE.AFTER_5_SEC
+      isPrivate,
+      commandMsgId,
+      DELAY_DELETE.IMMEDIATELY
     );
-    return;
-  }
 
-  const userData = await UserService.getUserData(bot, chatId, userId, userName);
-  const userPhoto = await UserService.getUserProfilePhotos(
-    bot,
-    userId,
-    chatId,
-    token,
-    userName
-  );
-  const isUserExists = await UserController.checkUserExistence(API_URL, userId);
-  const preparedData = await UserService.formatData(
-    userData,
-    userPhoto,
-    chatId
-  );
+    if (isPrivate) {
+      await BotHelper.sendDelete(
+        bot,
+        chatId,
+        "If you want to add yourself to any community, please register yourself once – send the command\n/add\nin the chat of that community.",
+        DELAY_DELETE.AFTER_5_SEC
+      );
+      return;
+    }
 
-  if (isUserExists) {
-    await UserController.UpdateUserData(bot, API_URL, preparedData);
+    const userData = await UserService.parseUserFromChat(
+      bot,
+      chatId,
+      userId,
+      userName
+    );
+
+    const userPhoto = await UserService.parseUserProfilePhotos(
+      bot,
+      userId,
+      chatId,
+      token,
+      userName
+    );
+
+    const userFromDB = await UserController.getUser(API_URL, userId);
+
+    const preparedData = await UserService.formatData(
+      userData,
+      userPhoto,
+      chatId,
+      userFromDB
+    );
+
+    if (userFromDB) {
+      await UserController.UpdateUserData(bot, API_URL, preparedData);
+    } else {
+      await UserController.addNewUser(bot, API_URL, preparedData, chatId);
+    }
   } else {
-    await UserController.addNewUser(bot, API_URL, preparedData, chatId);
+    return;
   }
 });
 
 //USER AUTHENTIFICATION
 bot.onText(/\/space_login/, async (msg) => {
-  const chatId = await BotHelper.getChatIdByMessage(msg);
-  const commandMsgId = await BotHelper.getMsgId(msg);
-  const isPrivate = await BotHelper.isChatPrivate(msg);
-  const userId = await BotHelper.getUserIdByMessage(msg);
-  const storeState = await StoreService.getStoreState(chatId);
-  const { current_state: isProcessing, last_command: lastCommand } = storeState;
+  if (msg.text === "/space_login" || msg.text === `/space_login@${BOT_NAME}`) {
+    const chatId = await BotHelper.getChatIdByMessage(msg);
+    const commandMsgId = await BotHelper.getMsgId(msg);
+    const isPrivate = await BotHelper.isChatPrivate(msg);
+    const userId = await BotHelper.getUserIdByMessage(msg);
+    const storeState = await StoreService.getStoreState(chatId);
+    const { current_state: isProcessing, last_command: lastCommand } =
+      storeState;
 
-  await BotHelper.deleteMessage(
-    bot,
-    chatId,
-    isPrivate,
-    commandMsgId,
-    DELAY_DELETE.IMMEDIATELY
-  );
-
-  if (!isPrivate) {
-    await BotHelper.sendDelete(
+    await BotHelper.deleteMessage(
       bot,
       chatId,
-      `If you want login in the community space, please call\n${BOT_COMMANDS.SPACE_LOGIN}\n command in the private chat with bot\nhttps://t.me/${BOT_NAME}`,
-      DELAY_DELETE.AFTER_5_SEC
+      isPrivate,
+      commandMsgId,
+      DELAY_DELETE.IMMEDIATELY
     );
-    return;
-  }
 
-  if (isProcessing) {
-    await BotHelper.sendDelete(
-      bot,
-      chatId,
-      `Finish previous operation before pulling this command. Previous operation was: ${lastCommand}`,
-      DELAY_DELETE.AFTER_5_SEC
-    );
-    return;
-  }
+    if (!isPrivate) {
+      await BotHelper.sendDelete(
+        bot,
+        chatId,
+        `If you want login in the community space, please call\n${BOT_COMMANDS.SPACE_LOGIN}\n command in the private chat with bot\nhttps://t.me/${BOT_NAME}`,
+        DELAY_DELETE.AFTER_5_SEC
+      );
+      return;
+    }
 
-  await StoreService.updateLastCommand(chatId, BOT_COMMANDS.SPACE_LOGIN);
+    if (isProcessing) {
+      await BotHelper.sendDelete(
+        bot,
+        chatId,
+        `Finish previous operation before pulling this command. Previous operation was: ${lastCommand}`,
+        DELAY_DELETE.AFTER_5_SEC
+      );
+      return;
+    }
 
-  const isUserExists = await UserController.checkUserExistence(API_URL, userId);
+    await StoreService.updateLastCommand(chatId, BOT_COMMANDS.SPACE_LOGIN);
 
-  if (isUserExists) {
-    const updateData = {
-      user_id: userId,
-      user_bot_chat_id: md5(chatId.toString()),
-    };
-    await UserController.UpdateUserData(bot, API_URL, updateData, chatId);
+    const userFromDB = await UserController.getUser(API_URL, userId);
+
+    if (userFromDB) {
+      const updateData = {
+        user_id: userId,
+        user_bot_chat_id: md5(chatId.toString()),
+      };
+      await UserController.UpdateUserData(bot, API_URL, updateData, chatId);
+    } else {
+      await BotHelper.send(
+        bot,
+        chatId,
+        `Before login in the space please call\n${BOT_COMMANDS.ADD_USER}\ncommand in the chat, which was included in the community, and after that try again to call command ${BOT_COMMANDS.SPACE_LOGIN}`
+      );
+    }
+    await StoreService.updateLastCommand(chatId, BOT_COMMANDS.NO_COMMAND);
   } else {
-    await BotHelper.send(
-      bot,
-      chatId,
-      `Before login in the space please call\n${BOT_COMMANDS.ADD_USER}\ncommand in the chat, which was included in the community, and after that try again to call command ${BOT_COMMANDS.SPACE_LOGIN}`
-    );
+    return;
   }
-  await StoreService.updateLastCommand(chatId, BOT_COMMANDS.NO_COMMAND);
 });
 
 //GROUP DATA PARSING
@@ -294,30 +319,29 @@ bot.on("new_chat_members", async (msg) => {
     }
     const userId = member.id;
     const userName = member.username;
-    const userData = await UserService.getUserData(
+    const userData = await UserService.parseUserFromChat(
       bot,
       chatId,
       userId,
       userName
     );
-    const userPhoto = await UserService.getUserProfilePhotos(
+    const userPhoto = await UserService.parseUserProfilePhotos(
       bot,
       userId,
       chatId,
       token,
       userName
     );
-    const isUserExists = await UserController.checkUserExistence(
-      API_URL,
-      userId
-    );
+    const userFromDB = await UserController.getUser(API_URL, userId);
+
     const preparedData = await UserService.formatData(
       userData,
       userPhoto,
-      chatId
+      chatId,
+      userFromDB
     );
 
-    if (isUserExists) {
+    if (userFromDB) {
       await UserController.UpdateUserData(bot, API_URL, preparedData);
     } else {
       await UserController.addNewUser(bot, API_URL, preparedData, chatId);
@@ -327,91 +351,99 @@ bot.on("new_chat_members", async (msg) => {
 
 //OPEN APP
 bot.onText(/\/open_app/, async (msg) => {
-  const chatId = await BotHelper.getChatIdByMessage(msg);
-  const commandMsgId = await BotHelper.getMsgId(msg);
-  const isPrivate = await BotHelper.isChatPrivate(msg);
-  const userId = await BotHelper.getUserIdByMessage(msg);
+  if (msg.text === "/open_app" || msg.text === `/open_app@${BOT_NAME}`) {
+    const chatId = await BotHelper.getChatIdByMessage(msg);
+    const commandMsgId = await BotHelper.getMsgId(msg);
+    const isPrivate = await BotHelper.isChatPrivate(msg);
+    const userId = await BotHelper.getUserIdByMessage(msg);
 
-  const { current_state: isProcessing, last_command: lastCommand } =
-    await StoreService.getStoreState(chatId);
+    const { current_state: isProcessing, last_command: lastCommand } =
+      await StoreService.getStoreState(chatId);
 
-  if (isProcessing) {
-    await BotHelper.send(
-      bot,
-      chatId,
-      `Finish previous operation before pulling this command. Previous operation was: ${lastCommand}`
-    );
-    return;
-  }
-
-  await StoreService.updateLastCommand(chatId, BOT_COMMANDS.OPEN_APP);
-  await BotHelper.deleteMessage(
-    bot,
-    chatId,
-    isPrivate,
-    commandMsgId,
-    DELAY_DELETE.IMMEDIATELY
-  );
-
-  const userData = await UserController.getUser(API_URL, userId);
-  const loginData = userData && userData.user_bot_chat_id;
-
-  if (isPrivate) {
-    if (loginData) {
-      await bot
-        .sendMessage(chatId, "Click below to open the app: ", {
-          reply_markup: {
-            inline_keyboard: [
-              [
-                {
-                  text: "Open app",
-                  web_app: {
-                    url: `${WEB_APP_URL}?user_id=${userId}&private_id=${loginData}`,
-                  },
-                },
-              ],
-            ],
-          },
-        })
-        .then((sentMsg) => {
-          bot.pinChatMessage(chatId, sentMsg.message_id);
-        });
-    } else {
+    if (isProcessing) {
       await BotHelper.send(
         bot,
         chatId,
-        `Before you will have access to community you should:\n1) call ${BOT_COMMANDS.ADD_USER} in any group of this community\n2)authorize yourself, just call ${BOT_COMMANDS.SPACE_LOGIN} here, in a private chat with this bot.\nThis will give you full access to community space.`
+        `Finish previous operation before pulling this command. Previous operation was: ${lastCommand}`
+      );
+      return;
+    }
+
+    await StoreService.updateLastCommand(chatId, BOT_COMMANDS.OPEN_APP);
+    await BotHelper.deleteMessage(
+      bot,
+      chatId,
+      isPrivate,
+      commandMsgId,
+      DELAY_DELETE.IMMEDIATELY
+    );
+
+    const userData = await UserController.getUser(API_URL, userId);
+    const loginData = userData && userData.user_bot_chat_id;
+
+    if (isPrivate) {
+      if (loginData) {
+        await bot
+          .sendMessage(chatId, "Click below to open the app: ", {
+            reply_markup: {
+              inline_keyboard: [
+                [
+                  {
+                    text: "Open app",
+                    web_app: {
+                      url: `${WEB_APP_URL}?user_id=${userId}&private_id=${loginData}`,
+                    },
+                  },
+                ],
+              ],
+            },
+          })
+          .then((sentMsg) => {
+            bot.pinChatMessage(chatId, sentMsg.message_id);
+          });
+      } else {
+        await BotHelper.send(
+          bot,
+          chatId,
+          `Before you will have access to community you should:\n1) call ${BOT_COMMANDS.ADD_USER} in any group of this community\n2)authorize yourself, just call ${BOT_COMMANDS.SPACE_LOGIN} here, in a private chat with this bot.\nThis will give you full access to community space.`
+        );
+      }
+    } else {
+      await BotHelper.send(
+        bot,
+        userId,
+        `Hi!\nYou can open your application if you has been added and authorized in the space.\nBefore you will have access to community you should:\n1) call ${BOT_COMMANDS.ADD_USER} in any group of this community\n2)authorize yourself, just call ${BOT_COMMANDS.SPACE_LOGIN} here, in a private chat with this bot.This will give you full access to community space.\n3)After that just run ${BOT_COMMANDS.OPEN_APP} to get your personal link.\nThank you, hope to see you in your cozy space! ❤️`
       );
     }
-  } else {
-    await BotHelper.send(
-      bot,
-      userId,
-      `Hi!\nYou can open your application if you has been added and authorized in the space.\nBefore you will have access to community you should:\n1) call ${BOT_COMMANDS.ADD_USER} in any group of this community\n2)authorize yourself, just call ${BOT_COMMANDS.SPACE_LOGIN} here, in a private chat with this bot.This will give you full access to community space.\n3)After that just run ${BOT_COMMANDS.OPEN_APP} to get your personal link.\nThank you, hope to see you in your cozy space! ❤️`
-    );
-  }
 
-  await StoreService.updateLastCommand(chatId, BOT_COMMANDS.NO_COMMAND);
+    await StoreService.updateLastCommand(chatId, BOT_COMMANDS.NO_COMMAND);
+  } else {
+    return;
+  }
 });
 
 //HELP COMMAND
 bot.onText(/\/help/, async (msg) => {
-  const isPrivate = await BotHelper.isChatPrivate(msg);
-  const chatId = await BotHelper.getChatIdByMessage(msg);
-  const msgId = await BotHelper.getMsgId(msg);
+  if (msg.text === "/help" || msg.text === `/help@${BOT_NAME}`) {
+    const isPrivate = await BotHelper.isChatPrivate(msg);
+    const chatId = await BotHelper.getChatIdByMessage(msg);
+    const msgId = await BotHelper.getMsgId(msg);
 
-  await BotHelper.deleteMessage(
-    bot,
-    chatId,
-    isPrivate,
-    msgId,
-    DELAY_DELETE.IMMEDIATELY
-  );
+    await BotHelper.deleteMessage(
+      bot,
+      chatId,
+      isPrivate,
+      msgId,
+      DELAY_DELETE.IMMEDIATELY
+    );
 
-  const helpText = `/help - show all available commands\n/space_create - create your own space\n/add - add yourself to the space (active in workchat)\n/space_login - authorize in community space\n/open_app - get personal link to the space`;
+    const helpText = `/help - show all available commands\n/space_create - create your own space\n/add - add yourself to the space (active in workchat)\n/space_login - authorize in community space\n/open_app - get personal link to the space`;
 
-  if (isPrivate) {
-    await BotHelper.send(bot, chatId, helpText);
+    if (isPrivate) {
+      await BotHelper.send(bot, chatId, helpText);
+    }
+  } else {
+    return;
   }
 });
 
