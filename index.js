@@ -452,7 +452,7 @@ bot.onText(/\/help/, async (msg) => {
 });
 
 bot.on("channel_post", async (msg) => {
-  if (msg.text.includes("#")) {
+  if (msg.text && msg.text.includes("#")) {
     const chatId = await BotHelper.getChatIdByMessage(msg);
     const msgText = msg.text;
     const userName = `${msg.from.first_name} ${msg.from.last_name}`;
@@ -480,7 +480,7 @@ bot.on("channel_post", async (msg) => {
 });
 
 bot.on("edited_channel_post", async (msg) => {
-  if (msg.text.includes("#")) {
+  if (msg.text && msg.text.includes("#")) {
     const chatId = await BotHelper.getChatIdByMessage(msg);
     const msgText = msg.text;
     const userName = `${msg.from.first_name} ${msg.from.last_name}`;
@@ -580,7 +580,13 @@ bot.on("message", async (msg) => {
     return;
   }
 
-  if (!isPrivate && !isCommand && msg?.text.includes("#") && !isPinnedMessage) {
+  if (
+    !isPrivate &&
+    !isCommand &&
+    !isPinnedMessage &&
+    msg.text &&
+    msg?.text?.includes("#")
+  ) {
     const msgText = msg.text;
     const userName = `${msg.from.first_name} ${msg.from.last_name}`;
     const userId = await BotHelper.getUserIdByMessage(msg);
@@ -613,7 +619,13 @@ bot.on("edited_message", async (msg) => {
     : msg?.text?.startsWith("/");
   const isPinnedMessage = msg?.pinned_message;
 
-  if (!isPrivate && !isCommand && msg?.text.includes("#") && !isPinnedMessage) {
+  if (
+    !isPrivate &&
+    !isCommand &&
+    !isPinnedMessage &&
+    msg.text &&
+    msg?.text?.includes("#")
+  ) {
     const chatId = await BotHelper.getChatIdByMessage(msg);
     const msgText = msg.text;
     const userName = `${msg.from.first_name} ${msg.from.last_name}`;
