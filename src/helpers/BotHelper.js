@@ -11,6 +11,26 @@ class BotHelper {
     return msg?.message_id;
   }
 
+  async getMsgDate(msg) {
+    return msg?.date;
+  }
+
+  async getMsgLink(msg) {
+    const chatId = msg.chat.id;
+    const messageId = msg.message_id;
+    return `https://t.me/c/${chatId.toString().substring(4)}/${messageId}`;
+  }
+
+  async extractHashtags(text) {
+    const regex = /#(\S+)/g;
+    const hashtags = [];
+    let match;
+    while ((match = regex.exec(text)) !== null) {
+      hashtags.push(match[1].toLowerCase());
+    }
+    return hashtags;
+  }
+
   async isChatPrivate(msg) {
     return msg?.chat?.type === "private";
   }

@@ -17,7 +17,23 @@ class UserService {
     }
   }
 
-  async parseUserProfilePhotos(bot, userId, chatId, token, userName) {
+  async getUserPhotoFromTg(bot, userId, token) {
+    try {
+      const userProfilePhotos = await bot.getUserProfilePhotos(userId);
+
+      if (userProfilePhotos.total_count > 0) {
+        const file = await bot.getFile(userProfilePhotos.photos[0][0].file_id);
+        const photoUrl = `https://api.telegram.org/file/bot${token}/${file.file_path}`;
+        return photoUrl;
+      } else {
+        return null;
+      }
+    } catch (e) {
+      console.error(`Error during getting photo of user. USER ID: ${userId}`);
+    }
+  }
+
+  async parseUserProfilePhotosOnAdd(bot, userId, chatId, token, userName) {
     try {
       const userProfilePhotos = await bot.getUserProfilePhotos(userId);
       if (userProfilePhotos.total_count > 0) {

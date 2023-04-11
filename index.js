@@ -10,10 +10,12 @@ import UserService from "./src/services/UserService.js";
 import SpaceService from "./src/services/SpaceService.js";
 import StoreService from "./src/store/StoreService.js";
 import GroupService from "./src/services/GroupService.js";
+import MessageService from "./src/services/MessageService.js";
 
 import UserController from "./src/controllers/UserController.js";
 import SpaceController from "./src/controllers/SpaceController.js";
 import GroupController from "./src/controllers/GroupController.js";
+import MessageController from "./src/controllers/MessageController.js";
 
 import {
   DELAY_DELETE,
@@ -27,6 +29,8 @@ dotenv.config();
 const token = process.env.TG_BOT_TOKEN;
 const WEB_APP_URL = process.env.WEB_APP_URL;
 const API_URL = process.env.API_URL;
+// const FAKE_API_URL = process.env.FAKE_API_URL;
+
 let bot;
 
 //BOT CONFIG
@@ -167,7 +171,7 @@ bot.onText(/\/add/, async (msg) => {
       userName
     );
 
-    const userPhoto = await UserService.parseUserProfilePhotos(
+    const userPhoto = await UserService.parseUserProfilePhotosOnAdd(
       bot,
       userId,
       chatId,
@@ -325,7 +329,7 @@ bot.on("new_chat_members", async (msg) => {
       userId,
       userName
     );
-    const userPhoto = await UserService.parseUserProfilePhotos(
+    const userPhoto = await UserService.parseUserProfilePhotosOnAdd(
       bot,
       userId,
       chatId,
@@ -447,13 +451,68 @@ bot.onText(/\/help/, async (msg) => {
   }
 });
 
+bot.on("channel_post", async (msg) => {
+  if (msg.text.includes("#")) {
+    const chatId = await BotHelper.getChatIdByMessage(msg);
+    const msgText = msg.text;
+    const userName = `${msg.from.first_name} ${msg.from.last_name}`;
+    const userId = await BotHelper.getUserIdByMessage(msg);
+    const link = await BotHelper.getMsgLink(msg);
+    const msgId = await BotHelper.getMsgId(msg);
+    const tags = await BotHelper.extractHashtags(msg.text);
+    const date = await BotHelper.getMsgDate(msg);
+    const userPhoto = await UserService.getUserPhotoFromTg(bot, userId, token);
+
+    const preparedData = await MessageService.formatData({
+      userId,
+      chatId,
+      link,
+      msgId,
+      tags,
+      date,
+      msgText,
+      userName,
+      userPhoto,
+    });
+
+    await MessageController.createMessage(API_URL, preparedData);
+  }
+});
+
+bot.on("edited_channel_post", async (msg) => {
+  if (msg.text.includes("#")) {
+    const chatId = await BotHelper.getChatIdByMessage(msg);
+    const msgText = msg.text;
+    const userName = `${msg.from.first_name} ${msg.from.last_name}`;
+    const userId = await BotHelper.getUserIdByMessage(msg);
+    const link = await BotHelper.getMsgLink(msg);
+    const msgId = await BotHelper.getMsgId(msg);
+    const tags = await BotHelper.extractHashtags(msg.text);
+    const date = await BotHelper.getMsgDate(msg);
+    const userPhoto = await UserService.getUserPhotoFromTg(bot, userId, token);
+
+    const preparedData = await MessageService.formatData({
+      userId,
+      chatId,
+      link,
+      msgId,
+      tags,
+      date,
+      msgText,
+      userName,
+      userPhoto,
+    });
+
+    await MessageController.updateMessage(API_URL, preparedData);
+  }
+});
+
 //ALL INLINE MESSAGES HANDLER
 bot.on("message", async (msg) => {
   const isCommand = msg.pinned_message
     ? msg?.pinned_message?.text.startsWith("/")
     : msg?.text?.startsWith("/");
   const isPinnedMessage = msg?.pinned_message;
-
   const chatId = await BotHelper.getChatIdByMessage(msg);
   const { current_state: currentState, community_data } =
     await StoreService.getStoreState(chatId);
@@ -477,6 +536,7 @@ bot.on("message", async (msg) => {
         "Please provide community description: "
       );
     }
+    return;
   }
 
   // Create space description
@@ -516,6 +576,65 @@ bot.on("message", async (msg) => {
         }
       );
     }
+    return;
+  }
+
+  if (!isCommand && msg.text.includes("#") && !isPinnedMessage) {
+    const msgText = msg.text;
+    const userName = `${msg.from.first_name} ${msg.from.last_name}`;
+    const userId = await BotHelper.getUserIdByMessage(msg);
+    const link = await BotHelper.getMsgLink(msg);
+    const msgId = await BotHelper.getMsgId(msg);
+    const tags = await BotHelper.extractHashtags(msg.text);
+    const date = await BotHelper.getMsgDate(msg);
+    const userPhoto = await UserService.getUserPhotoFromTg(bot, userId, token);
+
+    const preparedData = await MessageService.formatData({
+      userId,
+      chatId,
+      link,
+      msgId,
+      tags,
+      date,
+      msgText,
+      userName,
+      userPhoto,
+    });
+
+    await MessageController.createMessage(API_URL, preparedData);
+  }
+});
+
+bot.on("edited_message", async (msg) => {
+  const isCommand = msg.pinned_message
+    ? msg?.pinned_message?.text.startsWith("/")
+    : msg?.text?.startsWith("/");
+  const isPinnedMessage = msg?.pinned_message;
+
+  if (!isCommand && msg.text.includes("#") && !isPinnedMessage) {
+    const chatId = await BotHelper.getChatIdByMessage(msg);
+    const msgText = msg.text;
+    const userName = `${msg.from.first_name} ${msg.from.last_name}`;
+    const userId = await BotHelper.getUserIdByMessage(msg);
+    const link = await BotHelper.getMsgLink(msg);
+    const msgId = await BotHelper.getMsgId(msg);
+    const tags = await BotHelper.extractHashtags(msg.text);
+    const date = await BotHelper.getMsgDate(msg);
+    const userPhoto = await UserService.getUserPhotoFromTg(bot, userId, token);
+
+    const preparedData = await MessageService.formatData({
+      userId,
+      chatId,
+      link,
+      msgId,
+      tags,
+      date,
+      msgText,
+      userName,
+      userPhoto,
+    });
+
+    await MessageController.updateMessage(API_URL, preparedData);
   }
 });
 
