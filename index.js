@@ -509,6 +509,7 @@ bot.on("edited_channel_post", async (msg) => {
 
 //ALL INLINE MESSAGES HANDLER
 bot.on("message", async (msg) => {
+  const isPrivate = await BotHelper.isChatPrivate(msg);
   const isCommand = msg.pinned_message
     ? msg?.pinned_message?.text.startsWith("/")
     : msg?.text?.startsWith("/");
@@ -579,7 +580,7 @@ bot.on("message", async (msg) => {
     return;
   }
 
-  if (!isCommand && msg?.text.includes("#") && !isPinnedMessage) {
+  if (!isPrivate && !isCommand && msg?.text.includes("#") && !isPinnedMessage) {
     const msgText = msg.text;
     const userName = `${msg.from.first_name} ${msg.from.last_name}`;
     const userId = await BotHelper.getUserIdByMessage(msg);
@@ -606,12 +607,13 @@ bot.on("message", async (msg) => {
 });
 
 bot.on("edited_message", async (msg) => {
+  const isPrivate = await BotHelper.isChatPrivate(msg);
   const isCommand = msg.pinned_message
     ? msg?.pinned_message?.text.startsWith("/")
     : msg?.text?.startsWith("/");
   const isPinnedMessage = msg?.pinned_message;
 
-  if (!isCommand && msg?.text.includes("#") && !isPinnedMessage) {
+  if (!isPrivate && !isCommand && msg?.text.includes("#") && !isPinnedMessage) {
     const chatId = await BotHelper.getChatIdByMessage(msg);
     const msgText = msg.text;
     const userName = `${msg.from.first_name} ${msg.from.last_name}`;
