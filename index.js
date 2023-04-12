@@ -455,7 +455,7 @@ bot.on("channel_post", async (msg) => {
   if (msg.text && msg.text.includes("#")) {
     const chatId = await BotHelper.getChatIdByMessage(msg);
     const msgText = msg.text;
-    const userName = `${msg.from.first_name} ${msg.from.last_name}`;
+    const userName = `${msg.from.first_name ?? ""} ${msg.from.last_name ?? ""}`;
     const userId = await BotHelper.getUserIdByMessage(msg);
     const link = await BotHelper.getMsgLink(msg);
     const msgId = await BotHelper.getMsgId(msg);
@@ -483,7 +483,7 @@ bot.on("edited_channel_post", async (msg) => {
   if (msg.text && msg.text.includes("#")) {
     const chatId = await BotHelper.getChatIdByMessage(msg);
     const msgText = msg.text;
-    const userName = `${msg.from.first_name} ${msg.from.last_name}`;
+    const userName = `${msg.from.first_name ?? ""} ${msg.from.last_name ?? ""}`;
     const userId = await BotHelper.getUserIdByMessage(msg);
     const link = await BotHelper.getMsgLink(msg);
     const msgId = await BotHelper.getMsgId(msg);
@@ -588,7 +588,7 @@ bot.on("message", async (msg) => {
     msg?.text?.includes("#")
   ) {
     const msgText = msg.text;
-    const userName = `${msg.from.first_name} ${msg.from.last_name}`;
+    const userName = `${msg.from.first_name ?? ""} ${msg.from.last_name ?? ""}`;
     const userId = await BotHelper.getUserIdByMessage(msg);
     const link = await BotHelper.getMsgLink(msg);
     const msgId = await BotHelper.getMsgId(msg);
