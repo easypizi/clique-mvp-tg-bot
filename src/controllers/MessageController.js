@@ -2,7 +2,6 @@ import request from "request";
 
 class MessageController {
   async createMessage(api_url, preparedData) {
-    console.log(preparedData);
     try {
       const create_endpoint = `${api_url}/create-message`;
       request.post(create_endpoint, { json: preparedData });
