@@ -455,16 +455,13 @@ bot.on("channel_post", async (msg) => {
   if (msg.text && msg.text.includes("#")) {
     const chatId = await BotHelper.getChatIdByMessage(msg);
     const msgText = msg.text;
-    const userName = `${msg.from.first_name ?? ""} ${msg.from.last_name ?? ""}`;
-    const userId = await BotHelper.getUserIdByMessage(msg);
+    const userName = msg.author_signature ?? "Anonymous";
     const link = await BotHelper.getMsgLink(msg);
     const msgId = await BotHelper.getMsgId(msg);
     const tags = await BotHelper.extractHashtags(msg.text);
     const date = await BotHelper.getMsgDate(msg);
-    const userPhoto = await UserService.getUserPhotoFromTg(bot, userId, token);
 
     const preparedData = await MessageService.formatData({
-      userId,
       chatId,
       link,
       msgId,
@@ -472,7 +469,6 @@ bot.on("channel_post", async (msg) => {
       date,
       msgText,
       userName,
-      userPhoto,
     });
 
     await MessageController.createMessage(API_URL, preparedData);
@@ -483,16 +479,13 @@ bot.on("edited_channel_post", async (msg) => {
   if (msg.text && msg.text.includes("#")) {
     const chatId = await BotHelper.getChatIdByMessage(msg);
     const msgText = msg.text;
-    const userName = `${msg.from.first_name ?? ""} ${msg.from.last_name ?? ""}`;
-    const userId = await BotHelper.getUserIdByMessage(msg);
+    const userName = msg.author_signature ?? "Anonymous";
     const link = await BotHelper.getMsgLink(msg);
     const msgId = await BotHelper.getMsgId(msg);
     const tags = await BotHelper.extractHashtags(msg.text);
     const date = await BotHelper.getMsgDate(msg);
-    const userPhoto = await UserService.getUserPhotoFromTg(bot, userId, token);
 
     const preparedData = await MessageService.formatData({
-      userId,
       chatId,
       link,
       msgId,
@@ -500,7 +493,6 @@ bot.on("edited_channel_post", async (msg) => {
       date,
       msgText,
       userName,
-      userPhoto,
     });
 
     await MessageController.updateMessage(API_URL, preparedData);

@@ -17,9 +17,9 @@ class MessageService {
       message_text: msgText,
       message_tags: tags,
       message_link: link,
-      message_user_photo: userPhoto,
+      message_user_photo: userPhoto ?? null,
       message_user_name: userName,
-      message_user_id: userId.toString(),
+      message_user_id: userId?.toString() ?? null,
     };
   }
 }
