@@ -14,6 +14,14 @@ class StoreService {
         description: null,
         id: null,
       },
+      file_data: {
+        file_name: null,
+        file_id: null,
+        file_size: null,
+        mime_type: null,
+        file_unique_id: null,
+        to_space: null,
+      },
     });
 
     this.stores[chatId] = botStore;
@@ -112,6 +120,63 @@ class StoreService {
       });
     });
     updateCommunityIdDispatch(idData);
+  }
+
+  async resetCurrentFile(chatId) {
+    const botStore = await this.getBotStore(chatId);
+    const resetCurrentFileDispatch = createEvent();
+
+    const updateStoreEffect = createEffect((params) => {
+      botStore.setState(params);
+    });
+
+    resetCurrentFileDispatch.watch(() => {
+      updateStoreEffect({
+        ...botStore.getState(),
+        file_data: {
+          file_name: null,
+          file_id: null,
+          file_size: null,
+          mime_type: null,
+          file_unique_id: null,
+          to_space: null,
+        },
+      });
+    });
+    resetCurrentFileDispatch();
+  }
+
+  async prepareCurrentFileForUpload(chatId, fileData) {
+    const botStore = await this.getBotStore(chatId);
+    const prepareFileUploadDispatch = createEvent();
+
+    const updateStoreEffect = createEffect((params) => {
+      botStore.setState(params);
+    });
+
+    prepareFileUploadDispatch.watch(
+      ({
+        file_name,
+        file_id,
+        file_size,
+        mime_type,
+        file_unique_id,
+        to_space,
+      }) => {
+        updateStoreEffect({
+          ...botStore.getState(),
+          file_data: {
+            file_name: file_name,
+            file_id: file_id,
+            file_size: file_size,
+            mime_type: mime_type,
+            file_unique_id: file_unique_id,
+            to_space: to_space,
+          },
+        });
+      }
+    );
+    prepareFileUploadDispatch(fileData);
   }
 }
 

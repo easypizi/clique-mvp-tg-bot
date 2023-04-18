@@ -11,6 +11,7 @@ import SpaceService from "./src/services/SpaceService.js";
 import StoreService from "./src/store/StoreService.js";
 import GroupService from "./src/services/GroupService.js";
 import MessageService from "./src/services/MessageService.js";
+import FileUploadService from "./src/services/FileUploadService.js";
 
 import UserController from "./src/controllers/UserController.js";
 import SpaceController from "./src/controllers/SpaceController.js";
@@ -23,6 +24,7 @@ import {
   BOT_STATE_MANAGER_MAPPING,
   BOT_NAME,
 } from "./src/const.js";
+import FileController from "./src/controllers/FileController.js";
 
 dotenv.config();
 
@@ -552,11 +554,11 @@ bot.on("message", async (msg) => {
           [
             {
               text: "✅ Yes",
-              callback_data: "yes",
+              callback_data: "correct_space_information",
             },
             {
               text: "🚫 No",
-              callback_data: "no",
+              callback_data: "incorrect_space_information",
             },
           ],
         ],
@@ -654,7 +656,7 @@ bot.on("callback_query", async (query) => {
   const userId = await BotHelper.getUserIdByMessage(query);
   const msgId = await BotHelper.getMsgId(query.message);
 
-  if (query.data === "yes") {
+  if (query.data === "correct_space_information") {
     await BotHelper.deleteMessage(
       bot,
       chatId,
@@ -690,10 +692,8 @@ bot.on("callback_query", async (query) => {
       chatId,
       BOT_STATE_MANAGER_MAPPING.DEFAULT
     );
-    await StoreService.updateLastCommand(BOT_COMMANDS.NO_COMMAND);
-  }
-
-  if (query.data === "no") {
+    await StoreService.updateLastCommand(chatId, BOT_COMMANDS.NO_COMMAND);
+  } else if (query.data === "incorrect_space_information") {
     bot.editMessageText(
       `Please provide community data again with command /space_create.`,
       {
@@ -739,19 +739,17 @@ bot.on("callback_query", async (query) => {
       msgId,
       DELAY_DELETE.IMMEDIATELY
     );
-  }
-
-  if (query.data === "delete_community") {
+  } else if (query.data === "delete_community") {
     const inlineKeyboard = {
       inline_keyboard: [
         [
           {
             text: "🔪 I'm sure, DELETE ",
-            callback_data: "delete_forever",
+            callback_data: "delete_space_forever",
           },
           {
             text: "🚫 CANCEL",
-            callback_data: "cancel_operation",
+            callback_data: "cancel_space_delete",
           },
         ],
       ],
@@ -766,7 +764,7 @@ bot.on("callback_query", async (query) => {
     );
   }
 
-  if (query.data === "delete_forever") {
+  if (query.data === "delete_space_forever") {
     await BotHelper.deleteMessage(
       bot,
       chatId,
@@ -787,7 +785,7 @@ bot.on("callback_query", async (query) => {
     bot.answerCallbackQuery(query.id, {
       text: "Community space was deleted",
     });
-  } else if (query.data === "cancel_operation") {
+  } else if (query.data === "cancel_space_delete") {
     await BotHelper.deleteMessage(
       bot,
       chatId,
@@ -806,5 +804,112 @@ bot.on("callback_query", async (query) => {
       "Ok, your space still exists. Just open app: \n/open_app\nto manage it",
       DELAY_DELETE.AFTER_2_SEC
     );
+  }
+
+  if (query.data === "upload_file") {
+    await BotHelper.deleteMessage(
+      bot,
+      chatId,
+      true,
+      msgId,
+      DELAY_DELETE.IMMEDIATELY
+    );
+    const { file_data: data } = await StoreService.getStoreState(chatId);
+    const fileUrl = await bot.getFileLink(data.file_id);
+
+    const preparedData = await FileUploadService.formatData({
+      ...data,
+      file_url: fileUrl,
+    });
+
+    await FileController.uploadFile(bot, API_URL, preparedData, chatId);
+    await StoreService.updateCurrentState(
+      chatId,
+      BOT_STATE_MANAGER_MAPPING.DEFAULT
+    );
+    await StoreService.updateLastCommand(chatId, BOT_COMMANDS.NO_COMMAND);
+  } else if (query.data === "cancel_upload") {
+    await BotHelper.deleteMessage(
+      bot,
+      chatId,
+      true,
+      msgId,
+      DELAY_DELETE.IMMEDIATELY
+    );
+
+    await StoreService.resetCurrentFile(chatId);
+    await StoreService.updateCurrentState(
+      chatId,
+      BOT_STATE_MANAGER_MAPPING.DEFAULT
+    );
+    await StoreService.updateLastCommand(chatId, BOT_COMMANDS.NO_COMMAND);
+  }
+});
+
+bot.on("document", async (msg) => {
+  const isPrivate = await BotHelper.isChatPrivate(msg);
+  const chatId = await BotHelper.getChatIdByMessage(msg);
+
+  if (isPrivate) {
+    const space = await SpaceController.getSpace(API_URL, chatId);
+    if (!space) {
+      await BotHelper.send(
+        bot,
+        chatId,
+        `You didn't create any space for uploading files\nIf you want to manage your own space, please run command\n${BOT_COMMANDS.SPACE_CREATE}\nto create one.`
+      );
+      return;
+    } else {
+      const { current_state: state } = await StoreService.getStoreState(chatId);
+
+      const { spaceName, spaceId } = space;
+      const file = msg?.document ?? msg?.audio ?? null;
+
+      if (state) {
+        await BotHelper.send(
+          bot,
+          chatId,
+          `Finish previous upload before sending new file.`
+        );
+        return;
+      }
+
+      if (file) {
+        await StoreService.updateCurrentState(
+          chatId,
+          BOT_STATE_MANAGER_MAPPING.SPACE_FILE_UPLOAD
+        );
+
+        await StoreService.updateLastCommand(chatId, "file upload");
+
+        await StoreService.prepareCurrentFileForUpload(chatId, {
+          ...file,
+          to_space: spaceId,
+        });
+
+        const inlineKeyboard = {
+          inline_keyboard: [
+            [
+              {
+                text: "☁️ UPLOAD",
+                callback_data: "upload_file",
+              },
+              {
+                text: "🚫 CANCEL",
+                callback_data: "cancel_upload",
+              },
+            ],
+          ],
+        };
+        await BotHelper.send(
+          bot,
+          chatId,
+          `Do you want to upload ${file.file_name} to "${spaceName}" community?\n\n`,
+          {
+            reply_markup: inlineKeyboard,
+          }
+        );
+      }
+    }
   }
 });
