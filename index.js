@@ -846,6 +846,74 @@ bot.on("callback_query", async (query) => {
   }
 });
 
+bot.on("audio", async (msg) => {
+  const isPrivate = await BotHelper.isChatPrivate(msg);
+  const chatId = await BotHelper.getChatIdByMessage(msg);
+
+  if (isPrivate) {
+    const space = await SpaceController.getSpace(API_URL, chatId);
+    if (!space) {
+      await BotHelper.send(
+        bot,
+        chatId,
+        `You didn't create any space for uploading files\nIf you want to manage your own space, please run command\n${BOT_COMMANDS.SPACE_CREATE}\nto create one.`
+      );
+      return;
+    } else {
+      const { current_state: state } = await StoreService.getStoreState(chatId);
+
+      const { spaceName, spaceId } = space;
+      const file = msg?.document ?? msg?.audio ?? null;
+
+      if (state) {
+        await BotHelper.send(
+          bot,
+          chatId,
+          `Finish previous upload before sending new file.`
+        );
+        return;
+      }
+
+      if (file) {
+        await StoreService.updateCurrentState(
+          chatId,
+          BOT_STATE_MANAGER_MAPPING.SPACE_FILE_UPLOAD
+        );
+
+        await StoreService.updateLastCommand(chatId, "file upload");
+
+        await StoreService.prepareCurrentFileForUpload(chatId, {
+          ...file,
+          to_space: spaceId,
+        });
+
+        const inlineKeyboard = {
+          inline_keyboard: [
+            [
+              {
+                text: "☁️ UPLOAD",
+                callback_data: "upload_file",
+              },
+              {
+                text: "🚫 CANCEL",
+                callback_data: "cancel_upload",
+              },
+            ],
+          ],
+        };
+        await BotHelper.send(
+          bot,
+          chatId,
+          `Do you want to upload ${file.file_name} to "${spaceName}" community?\n\n`,
+          {
+            reply_markup: inlineKeyboard,
+          }
+        );
+      }
+    }
+  }
+});
+
 bot.on("document", async (msg) => {
   const isPrivate = await BotHelper.isChatPrivate(msg);
   const chatId = await BotHelper.getChatIdByMessage(msg);
