@@ -1,5 +1,6 @@
 import dotenv from "dotenv";
 import express from "express";
+import cors from "cors";
 import md5 from "md5";
 import bodyParser from "body-parser";
 import TelegramBot from "node-telegram-bot-api";
@@ -40,6 +41,7 @@ if (process.env.NODE_ENV === "production") {
   //SERVER FOR WEB HOOK AND CONFIG FOR PRODUCTION MODE
   const app = express();
   app.use(bodyParser.json());
+  app.use(cors());
   bot = new TelegramBot(token, { group: true });
   bot.setWebHook(process.env.HEROKU_URL + bot.token);
   let server = app.listen(process.env.PORT, "0.0.0.0", () => {
@@ -52,6 +54,19 @@ if (process.env.NODE_ENV === "production") {
     res.sendStatus(200);
   });
   console.log("Bot server started in the " + process.env.NODE_ENV + " mode");
+
+  //TODO: here add all needed methods for web app data interaction
+
+  try {
+    app.post("/send-file", (req, res) => {
+      console.log("////////");
+      console.log(req.body);
+      console.log("////////");
+      res.status(200).send({ message: "all good, ve have connection" });
+    });
+  } catch (error) {
+    throw new Error(error.message);
+  }
 } else {
   //CONFIG FOR LOCAL DEVELOPMENT
   bot = new TelegramBot(token, { polling: true, group: true });
