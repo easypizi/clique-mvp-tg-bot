@@ -4,6 +4,27 @@ import BotHelper from "../helpers/BotHelper.js";
 import { DELAY_DELETE } from "../const.js";
 
 class FileController {
+  async prepareURLToBuffer(fileUrl) {
+    if (!fileUrl) {
+      throw new Error("Can not download file without fileUrl");
+    }
+
+    try {
+      return new Promise((resolve, reject) => {
+        request.get(fileUrl, function (error, response, body) {
+          if (!error && response.statusCode == 200) {
+            const fileBuffer = Buffer.from(body, "binary");
+            resolve(fileBuffer);
+          } else {
+            reject(error);
+          }
+        });
+      });
+    } catch (error) {
+      throw new Error(error.message);
+    }
+  }
+
   async uploadFile(bot, api_url, preparedData, chatId) {
     if (!preparedData.space_id || !preparedData.file_url) {
       throw new Error("Can not upload file without space or file");

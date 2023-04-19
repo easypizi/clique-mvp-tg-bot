@@ -67,7 +67,11 @@ if (process.env.NODE_ENV === "production") {
         `FileUrl: ${fileUrl};\nFileName: ${fileName}`
       );
 
-      await bot.sendDocument(chatId, fileUrl, {}, { filename: fileName });
+      const buffer = await FileController.prepareURLToBuffer(fileUrl);
+
+      console.log(buffer);
+
+      await bot.sendDocument(chatId, buffer, {}, { filename: fileName });
 
       res.status(200).send({ status: "success" });
     });
