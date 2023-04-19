@@ -555,6 +555,7 @@ bot.on("message", async (msg) => {
         chatId,
         BOT_STATE_MANAGER_MAPPING.SPACE_EDIT_NAME
       );
+      await StoreService.updateLastCommand(chatId, BOT_COMMANDS.SPACE_CREATE);
 
       await BotHelper.send(
         bot,
@@ -577,6 +578,7 @@ bot.on("message", async (msg) => {
         chatId,
         BOT_STATE_MANAGER_MAPPING.SPACE_EDIT_DESCRIPTION
       );
+      await StoreService.updateLastCommand(chatId, BOT_COMMANDS.SPACE_CREATE);
       const { community_data: space } = await StoreService.getStoreState(
         chatId
       );
