@@ -58,11 +58,16 @@ if (process.env.NODE_ENV === "production") {
   //TODO: here add all needed methods for web app data interaction
 
   try {
-    app.post("/send-file", (req, res) => {
-      console.log("////////");
-      console.log(req.body);
-      console.log("////////");
-      res.status(200).send({ message: "all good, ve have connection" });
+    app.post("/send-file", async (req, res) => {
+      const { chatId, fileUrl, fileName } = req.body;
+
+      await BotHelper.send(
+        bot,
+        chatId,
+        `FileUrl: ${fileUrl};\nFileName: ${fileName}`
+      );
+
+      res.status(200).send({});
     });
   } catch (error) {
     throw new Error(error.message);
