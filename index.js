@@ -67,7 +67,9 @@ if (process.env.NODE_ENV === "production") {
         `FileUrl: ${fileUrl};\nFileName: ${fileName}`
       );
 
-      res.status(200).send({});
+      await bot.sendDocument(chatId, fileUrl, {}, { filename: fileName });
+
+      res.status(200).send({ status: "success" });
     });
   } catch (error) {
     throw new Error(error.message);
