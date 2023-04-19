@@ -39,25 +39,24 @@ let bot;
 //BOT CONFIG
 if (process.env.NODE_ENV === "production") {
   //SERVER FOR WEB HOOK AND CONFIG FOR PRODUCTION MODE
-  const app = express();
-  app.use(bodyParser.json());
-  app.use(cors());
-  bot = new TelegramBot(token, { group: true });
-  bot.setWebHook(process.env.HEROKU_URL + bot.token);
-  let server = app.listen(process.env.PORT, "0.0.0.0", () => {
-    const host = server.address().address;
-    const port = server.address().port;
-    console.log("Web server started at http://%s:%s", host, port);
-  });
-  app.post("/" + bot.token, (req, res) => {
-    bot.processUpdate(req.body);
-    res.sendStatus(200);
-  });
-  console.log("Bot server started in the " + process.env.NODE_ENV + " mode");
-
-  //TODO: here add all needed methods for web app data interaction
-
   try {
+    const app = express();
+    app.use(bodyParser.json());
+    app.use(cors());
+    bot = new TelegramBot(token, { group: true });
+    bot.setWebHook(process.env.HEROKU_URL + bot.token);
+    let server = app.listen(process.env.PORT, "0.0.0.0", () => {
+      const host = server.address().address;
+      const port = server.address().port;
+      console.log("Web server started at http://%s:%s", host, port);
+    });
+    app.post("/" + bot.token, (req, res) => {
+      bot.processUpdate(req.body);
+      res.sendStatus(200);
+    });
+    console.log("Bot server started in the " + process.env.NODE_ENV + " mode");
+
+    //SENDING FILE ON DOWNLOAD IN TWA
     app.post("/send-file", async (req, res) => {
       const { chatId, fileUrl, fileName } = req.body;
 
@@ -69,9 +68,12 @@ if (process.env.NODE_ENV === "production") {
 
       const buffer = await FileController.prepareURLToBuffer(fileUrl);
 
-      console.log(buffer);
-
-      await bot.sendDocument(chatId, buffer, {}, { filename: fileName });
+      await bot.sendDocument(
+        chatId,
+        buffer,
+        {},
+        { filename: fileName, contentType: "application/octet-stream" }
+      );
 
       res.status(200).send({ status: "success" });
     });
