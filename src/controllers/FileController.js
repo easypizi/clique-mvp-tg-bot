@@ -4,20 +4,16 @@ import BotHelper from "../helpers/BotHelper.js";
 import { DELAY_DELETE } from "../const.js";
 
 class FileController {
-  async prepareURLToBuffer(fileUrl) {
+  async prepareURLToBuffer(fileUrl, mimeType) {
     if (!fileUrl) {
       throw new Error("Can not download file without fileUrl");
     }
 
     try {
       return new Promise((resolve, reject) => {
-        request.get(fileUrl, async function (error, response) {
+        request.get(fileUrl, async function (error, response, body) {
           if (!error && response.statusCode == 200) {
-            // const buffer = Buffer.from(await response.arrayBuffer());
-            const fileBuffer = Buffer.from(await response.arrayBuffer());
-
-            console.log(fileBuffer);
-
+            const fileBuffer = Buffer.from(body, mimeType);
             resolve(fileBuffer);
           } else {
             reject(error);
