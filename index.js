@@ -149,6 +149,10 @@ bot.onText(/\/space_create/, async (msg) => {
               text: "🔪 DELETE",
               callback_data: "delete_community",
             },
+            {
+              text: "🚫 CANCEL",
+              callback_data: "cancel_space_create",
+            },
           ],
         ],
       };
@@ -812,7 +816,10 @@ bot.on("callback_query", async (query) => {
     bot.answerCallbackQuery(query.id, {
       text: "Community space was deleted",
     });
-  } else if (query.data === "cancel_space_delete") {
+  } else if (
+    query.data === "cancel_space_delete" ||
+    query.data === "cancel_space_create"
+  ) {
     await BotHelper.deleteMessage(
       bot,
       chatId,
