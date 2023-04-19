@@ -58,7 +58,7 @@ if (process.env.NODE_ENV === "production") {
 
     //SENDING FILE ON DOWNLOAD IN TWA
     app.post("/send-file", async (req, res) => {
-      const { chatId, fileUrl, fileName } = req.body;
+      const { chatId, fileUrl, fileName, fileMime } = req.body;
 
       await BotHelper.send(
         bot,
@@ -72,7 +72,7 @@ if (process.env.NODE_ENV === "production") {
         chatId,
         buffer,
         {},
-        { filename: fileName, contentType: "application/octet-stream" }
+        { filename: fileName, contentType: fileMime }
       );
 
       res.status(200).send({ status: "success" });
