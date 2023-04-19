@@ -11,9 +11,13 @@ class FileController {
 
     try {
       return new Promise((resolve, reject) => {
-        request.get(fileUrl, function (error, response, body) {
+        request.get(fileUrl, async function (error, response, body) {
           if (!error && response.statusCode == 200) {
-            const fileBuffer = Buffer.from(body, "binary");
+            // const buffer = Buffer.from(await response.arrayBuffer());
+            const fileBuffer = Buffer.from(await body.arrayBuffer());
+
+            console.log(fileBuffer);
+
             resolve(fileBuffer);
           } else {
             reject(error);

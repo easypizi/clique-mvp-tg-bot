@@ -56,7 +56,7 @@ if (process.env.NODE_ENV === "production") {
     });
     console.log("Bot server started in the " + process.env.NODE_ENV + " mode");
 
-    //SENDING FILE ON DOWNLOAD IN TWA
+    //SENDING FILE TO USER IN PRIVATE MESSAGE ON DOWNLOAD IN TWA
     app.post("/send-file", async (req, res) => {
       const { chatId, fileUrl, fileName, fileMime } = req.body;
 
