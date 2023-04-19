@@ -39,36 +39,30 @@ let bot;
 //BOT CONFIG
 if (process.env.NODE_ENV === "production") {
   //SERVER FOR WEB HOOK AND CONFIG FOR PRODUCTION MODE
-  try {
-    const app = express();
-    app.use(bodyParser.json());
-    app.use(cors());
-    bot = new TelegramBot(token, { group: true });
-    bot.setWebHook(process.env.HEROKU_URL + bot.token);
-    let server = app.listen(process.env.PORT, "0.0.0.0", () => {
-      const host = server.address().address;
-      const port = server.address().port;
-      console.log("Web server started at http://%s:%s", host, port);
-    });
-    app.post("/" + bot.token, (req, res) => {
-      bot.processUpdate(req.body);
-      res.sendStatus(200);
-    });
-    console.log("Bot server started in the " + process.env.NODE_ENV + " mode");
 
-    //SENDING FILE TO USER IN PRIVATE MESSAGE ON DOWNLOAD IN TWA
-    app.post("/send-file", async (req, res) => {
+  const app = express();
+  app.use(bodyParser.json());
+  app.use(cors());
+  bot = new TelegramBot(token, { group: true });
+  bot.setWebHook(process.env.HEROKU_URL + bot.token);
+  let server = app.listen(process.env.PORT, "0.0.0.0", () => {
+    const host = server.address().address;
+    const port = server.address().port;
+    console.log("Web server started at http://%s:%s", host, port);
+  });
+  app.post("/" + bot.token, (req, res) => {
+    bot.processUpdate(req.body);
+    res.sendStatus(200);
+  });
+  console.log("Bot server started in the " + process.env.NODE_ENV + " mode");
+
+  //SENDING FILE TO USER IN PRIVATE MESSAGE ON DOWNLOAD IN TWA
+  app.post("/send-file", async (req, res) => {
+    try {
       const { chatId, fileUrl, fileName, fileMime } = req.body;
-
-      await BotHelper.send(
-        bot,
-        chatId,
-        `FileUrl: ${fileUrl};\nFileName: ${fileName}`
-      );
-
       const buffer = await FileController.prepareURLToBuffer(fileUrl);
 
-      console.log(buffer);
+      await BotHelper.send(bot, chatId, "Here is your file:");
 
       await bot.sendDocument(
         chatId,
@@ -76,12 +70,12 @@ if (process.env.NODE_ENV === "production") {
         {},
         { filename: fileName, contentType: fileMime }
       );
-
       res.status(200).send({ status: "success" });
-    });
-  } catch (error) {
-    throw new Error(error.message);
-  }
+    } catch (error) {
+      res.status(500).send({ status: "failed" });
+      throw new Error(error.message);
+    }
+  });
 } else {
   //CONFIG FOR LOCAL DEVELOPMENT
   bot = new TelegramBot(token, { polling: true, group: true });
@@ -947,6 +941,7 @@ bot.on("audio", async (msg) => {
 bot.on("document", async (msg) => {
   const isPrivate = await BotHelper.isChatPrivate(msg);
   const chatId = await BotHelper.getChatIdByMessage(msg);
+  const msgId = await BotHelper.getMsgId(msg);
 
   if (isPrivate) {
     const space = await SpaceController.getSpace(API_URL, chatId);
@@ -999,6 +994,22 @@ bot.on("document", async (msg) => {
             ],
           ],
         };
+
+        await BotHelper.deleteMessage(
+          bot,
+          chatId,
+          isPrivate,
+          msgId,
+          DELAY_DELETE.IMMEDIATELY
+        );
+
+        await BotHelper.sendDelete(
+          bot,
+          chatId,
+          "Yummy...",
+          DELAY_DELETE.AFTER_2_SEC
+        );
+
         await BotHelper.send(
           bot,
           chatId,
