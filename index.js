@@ -39,7 +39,6 @@ let bot;
 //BOT CONFIG
 if (process.env.NODE_ENV === "production") {
   //SERVER FOR WEB HOOK AND CONFIG FOR PRODUCTION MODE
-
   const app = express();
   app.use(bodyParser.json());
   app.use(cors());
@@ -62,7 +61,11 @@ if (process.env.NODE_ENV === "production") {
       const { chatId, fileUrl, fileName, fileMime } = req.body;
       const buffer = await FileController.prepareURLToBuffer(fileUrl);
 
-      await BotHelper.send(bot, chatId, "Here is your file:");
+      await BotHelper.send(
+        bot,
+        chatId,
+        "Here is your file. Now you can download or share it, as you wish: "
+      );
 
       await bot.sendDocument(
         chatId,
@@ -467,7 +470,7 @@ bot.onText(/\/help/, async (msg) => {
       DELAY_DELETE.IMMEDIATELY
     );
 
-    const helpText = `/help - show all available commands\n/space_create - create your own space\n/add - add yourself to the space (active in workchat)\n/space_login - authorize in community space\n/open_app - get personal link to the space`;
+    const helpText = `/help - show all available commands\n/space_create - create your own space\n/add - add yourself to the space (active in workchat)\n/space_login - authorize in community space\n/open_app - get personal link to the space\n\nIf you already have created community space you can upload new files to this space - just send it as *FILE* to this bot`;
 
     if (isPrivate) {
       await BotHelper.send(bot, chatId, helpText);
@@ -995,19 +998,19 @@ bot.on("document", async (msg) => {
           ],
         };
 
+        await BotHelper.sendDelete(
+          bot,
+          chatId,
+          "Yummy...",
+          DELAY_DELETE.AFTER_2_SEC
+        );
+
         await BotHelper.deleteMessage(
           bot,
           chatId,
           isPrivate,
           msgId,
           DELAY_DELETE.IMMEDIATELY
-        );
-
-        await BotHelper.sendDelete(
-          bot,
-          chatId,
-          "Yummy...",
-          DELAY_DELETE.AFTER_2_SEC
         );
 
         await BotHelper.send(
