@@ -4,21 +4,24 @@ import BotHelper from "../helpers/BotHelper.js";
 import { DELAY_DELETE } from "../const.js";
 
 class FileController {
-  async prepareURLToBuffer(fileUrl, mimeType) {
+  async prepareURLToBuffer(fileUrl) {
     if (!fileUrl) {
       throw new Error("Can not download file without fileUrl");
     }
 
     try {
       return new Promise((resolve, reject) => {
-        request.get(fileUrl, async function (error, response, body) {
-          if (!error && response.statusCode == 200) {
-            const fileBuffer = Buffer.from(body, mimeType);
-            resolve(fileBuffer);
-          } else {
-            reject(error);
+        request.get(
+          { url: fileUrl, encoding: null },
+          async function (error, response, body) {
+            if (!error && response.statusCode == 200) {
+              const fileBuffer = Buffer.from(body);
+              resolve(fileBuffer);
+            } else {
+              reject(error);
+            }
           }
-        });
+        );
       });
     } catch (error) {
       throw new Error(error.message);
