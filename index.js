@@ -1070,7 +1070,7 @@ bot.on("video", async (msg) => {
       const { current_state: state } = await StoreService.getStoreState(chatId);
 
       const { spaceName, spaceId } = space;
-      const file = msg?.audio ?? null;
+      const file = msg?.video ?? null;
 
       if (state) {
         await BotHelper.send(
