@@ -80,7 +80,7 @@ if (process.env.NODE_ENV === "production") {
     }
   });
 
-  app.post("send-contact", async (req, res) => {
+  app.post("/send-contact", async (req, res) => {
     try {
       const { data } = req.body;
 
