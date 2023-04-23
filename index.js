@@ -85,11 +85,6 @@ if (process.env.NODE_ENV === "production") {
       const { data } = req.body;
 
       if (data && data.length) {
-        //TODO: get User Info For both users
-
-        // const message =
-        //   "Hi! You have a mutual interest with some other community member! ";
-
         data.forEach(async (userId, index) => {
           const currentUser = await UserController.getUser(API_URL, userId);
           const otherUser =
@@ -97,12 +92,17 @@ if (process.env.NODE_ENV === "production") {
               ? await UserController.getUser(API_URL, data[1])
               : await UserController.getUser(API_URL, data[0]);
 
-          console.log("////////////");
-          console.log(currentUser);
-          console.log(otherUser);
-          console.log("////////////");
+          const message = `Hi! It's a MAAAAAATCH!!!\nLooks like you have something to discuss with ${
+            otherUser.user_name || "Anonymous"
+          } ${
+            otherUser?.user_last_name || ""
+          }.\n Some info about your contact:\n${
+            otherUser.user_description || ""
+          }.\n________________________________\nDo not wait, text him immediately: @${
+            otherUser.user_telegram_link
+          } !\n Good luck, hope this connection bring you new opportunities! ❤️`;
 
-          // await BotHelper.send(bot, userId, message);
+          await BotHelper.send(bot, currentUser.user_id, message);
         });
         res.status(200).send({ status: "success" });
       }
