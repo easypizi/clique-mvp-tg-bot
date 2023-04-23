@@ -79,6 +79,37 @@ if (process.env.NODE_ENV === "production") {
       throw new Error(error.message);
     }
   });
+
+  app.post("send-contact", async (req, res) => {
+    try {
+      const { data } = req.body;
+
+      if (data && data.length) {
+        //TODO: get User Info For both users
+
+        // const message =
+        //   "Hi! You have a mutual interest with some other community member! ";
+
+        data.forEach(async (userId, index) => {
+          const currentUser = await UserController.getUser(API_URL, userId);
+          const otherUser =
+            index === 0
+              ? await UserController.getUser(API_URL, data[1])
+              : await UserController.getUser(API_URL, data[0]);
+
+          console.log("////////////");
+          console.log(currentUser);
+          console.log(otherUser);
+          console.log("////////////");
+
+          // await BotHelper.send(bot, userId, message);
+        });
+        res.status(200).send({ status: "success" });
+      }
+    } catch (error) {
+      res.status(500).send({ status: "failed" });
+    }
+  });
 } else {
   //CONFIG FOR LOCAL DEVELOPMENT
   bot = new TelegramBot(token, { polling: true, group: true });
