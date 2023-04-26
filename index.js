@@ -113,7 +113,9 @@ if (process.env.NODE_ENV === "production") {
 
   app.post("/verify-event", async (req, res) => {
     try {
-      const { data } = req.body;
+      const data = req.body;
+
+      console.log(req.body);
 
       const space = await SpaceController.getSpace(
         API_URL,
