@@ -149,8 +149,10 @@ if (process.env.NODE_ENV === "production") {
       }\n-----------------------------\n**DATE and TIME:** ${
         data.event_date
       }\n\n**TYPE:** ${data.event_is_offline ? "Offline" : "Online"}\n\n${
-        event_is_offline ? "**Address: **" : "**Link:** "
-      }\n${event_is_offline ? address : data.event_location.link}\n\n${tags}`;
+        data.event_is_offline ? "**Address: **" : "**Link:** "
+      }\n${
+        data.event_is_offline ? address : data.event_location.link
+      }\n\n${tags}`;
 
       console.log("//////////////////");
       console.log(eventAgendaMessage);
@@ -163,7 +165,7 @@ if (process.env.NODE_ENV === "production") {
           [
             {
               text: "🆗 PUBLISH",
-              callback_data: "add_event",
+              callback_data: "accept_event",
             },
             {
               text: "🚫 DECLINE",
