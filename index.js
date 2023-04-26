@@ -114,15 +114,11 @@ if (process.env.NODE_ENV === "production") {
   app.post("/verify-event", async (req, res) => {
     try {
       const data = req.body;
-
-      console.log(req.body);
-
       const space = await SpaceController.getSpace(
         API_URL,
         data.event_space_id
       );
       const { spaceOwner } = space;
-
       const tags = data?.event_tags.length
         ? data.event_tags
             .replaceAll(" ", "")
@@ -130,7 +126,6 @@ if (process.env.NODE_ENV === "production") {
             .map((tag) => `#${tag}`)
             .join(" ")
         : "";
-
       const address = `${data.event_location.country}, ${
         data.event_location.city
       }, ${data.event_location.address}\n\n${
@@ -143,15 +138,11 @@ if (process.env.NODE_ENV === "production") {
         data.event_organizer_credentials
       } (${
         data.event_organizer_telegram_link
-      }) want to publish information about event:\n\n*${
-        data.event_name
-      }*\n-----------------------------\n${
+      }) want to publish information about event:\n\n*${data.event_name}*\n\n${
         data.event_description
-      }\n-----------------------------\n*DATE and TIME:* ${
-        data.event_date
-      }\n\n*TYPE:* ${data.event_is_offline ? "Offline" : "Online"}\n\n${
-        data.event_is_offline ? "*Address: *" : "*Link:* "
-      }\n${
+      }\n\n*DATE and TIME:* ${data.event_date}\n*TYPE:* ${
+        data.event_is_offline ? "Offline" : "Online"
+      }\n${data.event_is_offline ? "*Address: *" : "*Link:* "}\n${
         data.event_is_offline ? address : data.event_location.link
       }\n\n${tags}`;
 
