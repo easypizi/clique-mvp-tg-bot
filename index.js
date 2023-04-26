@@ -110,6 +110,67 @@ if (process.env.NODE_ENV === "production") {
       res.status(500).send({ status: "failed" });
     }
   });
+
+  app.post("/verify-event", async (req, res) => {
+    try {
+      const { data } = req.body;
+
+      const space = await SpaceController.getSpace(
+        API_URL,
+        data.event_space_id
+      );
+      const { spaceOwner } = space;
+
+      const tags = data?.event_tags.length
+        ? data?.event_tags
+            ?.splice(",")
+            .map((tag) => `#${tag}`)
+            ?.join(" ")
+        : "";
+
+      const address = `${data.event_location.country}, ${
+        data.event_location.city
+      }, ${data.event_location.address}\n${
+        data.event_location.geo.length
+          ? "**Map link:** " + data.event_location.geo
+          : ""
+      }`;
+
+      const eventAgendaMessage = `||${data.event_id}||\n\n${
+        data.event_organizer_credentials
+      } (${event_organizer_telegram_link}) want to publish information about event:\n\n**${
+        data.event_name
+      }**\n-----------------------------\n${
+        data.event_description
+      }\n-----------------------------\n**DATE and TIME:** ${
+        data.event_date
+      }\n\n**TYPE:** ${data.event_is_offline ? "Offline" : "Online"}\n\n${
+        event_is_offline ? "**Address: **" : "**Link:** "
+      }\n${event_is_offline ? address : data.event_location.link}\n\n${tags}`;
+
+      const inlineKeyboard = {
+        inline_keyboard: [
+          [
+            {
+              text: "🆗 PUBLISH",
+              callback_data: "add_event",
+            },
+            {
+              text: "🚫 DECLINE",
+              callback_data: "decline_event",
+            },
+          ],
+        ],
+      };
+      await BotHelper.send(bot, spaceOwner, eventAgendaMessage, {
+        reply_markup: inlineKeyboard,
+      });
+
+      res.status(200).send({ status: "success" });
+    } catch (error) {
+      res.status(500).send({ status: "failed" });
+    }
+  });
 } else {
   //CONFIG FOR LOCAL DEVELOPMENT
   bot = new TelegramBot(token, { polling: true, group: true });
@@ -565,6 +626,7 @@ bot.on("edited_channel_post", async (msg) => {
 
 //ALL INLINE MESSAGES HANDLER
 bot.on("message", async (msg) => {
+  const isFromBot = await BotHelper.checkIsFromBot(msg);
   const isPrivate = await BotHelper.isChatPrivate(msg);
   const isCommand = msg.pinned_message
     ? msg?.pinned_message?.text.startsWith("/")
@@ -639,6 +701,7 @@ bot.on("message", async (msg) => {
   }
 
   if (
+    !isFromBot &&
     !isPrivate &&
     !isCommand &&
     !isPinnedMessage &&

@@ -7,6 +7,10 @@ class BotHelper {
     return msg?.from.id;
   }
 
+  async checkIsFromBot(msg) {
+    return msg?.from.is_bot;
+  }
+
   async getMsgId(msg) {
     return msg?.message_id;
   }
