@@ -140,7 +140,9 @@ if (process.env.NODE_ENV === "production") {
 
       const eventAgendaMessage = `||${data.event_id}||\n\n${
         data.event_organizer_credentials
-      } (${event_organizer_telegram_link}) want to publish information about event:\n\n**${
+      } (${
+        data.event_organizer_telegram_link
+      }) want to publish information about event:\n\n**${
         data.event_name
       }**\n-----------------------------\n${
         data.event_description
