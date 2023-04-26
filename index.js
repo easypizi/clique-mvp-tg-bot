@@ -148,6 +148,12 @@ if (process.env.NODE_ENV === "production") {
         event_is_offline ? "**Address: **" : "**Link:** "
       }\n${event_is_offline ? address : data.event_location.link}\n\n${tags}`;
 
+      console.log("//////////////////");
+      console.log(eventAgendaMessage);
+      console.log(space);
+      console.log(spaceOwner);
+      console.log("//////////////////");
+
       const inlineKeyboard = {
         inline_keyboard: [
           [
@@ -168,6 +174,7 @@ if (process.env.NODE_ENV === "production") {
 
       res.status(200).send({ status: "success" });
     } catch (error) {
+      console.log(error);
       res.status(500).send({ status: "failed" });
     }
   });
