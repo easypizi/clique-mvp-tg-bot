@@ -125,7 +125,7 @@ if (process.env.NODE_ENV === "production") {
 
       const tags = data?.event_tags.length
         ? data.event_tags
-            .replace(" ", "")
+            .replaceAll(" ", "")
             .split(",")
             .map((tag) => `#${tag}`)
             .join(" ")
@@ -133,9 +133,9 @@ if (process.env.NODE_ENV === "production") {
 
       const address = `${data.event_location.country}, ${
         data.event_location.city
-      }, ${data.event_location.address}\n${
+      }, ${data.event_location.address}\n\n${
         data.event_location.geo.length
-          ? "**Map link:** " + data.event_location.geo
+          ? "*Map link:* " + data.event_location.geo
           : ""
       }`;
 
@@ -143,23 +143,17 @@ if (process.env.NODE_ENV === "production") {
         data.event_organizer_credentials
       } (${
         data.event_organizer_telegram_link
-      }) want to publish information about event:\n\n**${
+      }) want to publish information about event:\n\n*${
         data.event_name
-      }**\n-----------------------------\n${
+      }*\n-----------------------------\n${
         data.event_description
-      }\n-----------------------------\n**DATE and TIME:** ${
+      }\n-----------------------------\n*DATE and TIME:* ${
         data.event_date
-      }\n\n**TYPE:** ${data.event_is_offline ? "Offline" : "Online"}\n\n${
-        data.event_is_offline ? "**Address: **" : "**Link:** "
+      }\n\n*TYPE:* ${data.event_is_offline ? "Offline" : "Online"}\n\n${
+        data.event_is_offline ? "*Address: *" : "*Link:* "
       }\n${
         data.event_is_offline ? address : data.event_location.link
       }\n\n${tags}`;
-
-      console.log("//////////////////");
-      console.log(eventAgendaMessage);
-      console.log(space);
-      console.log(spaceOwner);
-      console.log("//////////////////");
 
       const inlineKeyboard = {
         inline_keyboard: [
