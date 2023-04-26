@@ -124,10 +124,11 @@ if (process.env.NODE_ENV === "production") {
       const { spaceOwner } = space;
 
       const tags = data?.event_tags.length
-        ? data?.event_tags
-            ?.split(",")
+        ? data.event_tags
+            .replace(" ", "")
+            .split(",")
             .map((tag) => `#${tag}`)
-            ?.join(" ")
+            .join(" ")
         : "";
 
       const address = `${data.event_location.country}, ${
@@ -176,6 +177,7 @@ if (process.env.NODE_ENV === "production") {
       };
       await BotHelper.send(bot, spaceOwner, eventAgendaMessage, {
         reply_markup: inlineKeyboard,
+        parse_mode: "Markdown",
       });
 
       res.status(200).send({ status: "success" });
