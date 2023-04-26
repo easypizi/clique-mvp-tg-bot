@@ -123,7 +123,7 @@ if (process.env.NODE_ENV === "production") {
 
       const tags = data?.event_tags.length
         ? data?.event_tags
-            ?.splice(",")
+            ?.split(",")
             .map((tag) => `#${tag}`)
             ?.join(" ")
         : "";
