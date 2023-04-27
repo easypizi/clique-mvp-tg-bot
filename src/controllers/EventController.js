@@ -8,7 +8,8 @@ class EventController {
         event_id: id,
         event_is_verified: true,
       };
-      request.patch(update_endpoint, { json: updateData });
+      const result = request.patch(update_endpoint, { json: updateData });
+      return result.data;
     } catch (error) {
       console.error(
         `Error during updating event in DB. Error message: ${error}`
@@ -19,7 +20,8 @@ class EventController {
   async deleteEvent(api_url, id) {
     try {
       const delete_endpoint = `${api_url}/delete-event/${id}`;
-      request.delete(delete_endpoint);
+      const result = request.delete(delete_endpoint);
+      return result.data;
     } catch (error) {
       console.error(
         `Error during deleting event in DB. Error message: ${error}`
