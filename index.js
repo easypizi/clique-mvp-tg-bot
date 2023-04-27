@@ -792,25 +792,22 @@ bot.on("callback_query", async (query) => {
     if (exctractedId && exctractedId.length) {
       const id = exctractedId[0];
       const updatedEvent = await EventController.updateEvent(API_URL, id);
-
-      console.log(updatedEvent);
-
-      // if (updatedEvent) {
-      //   bot.answerCallbackQuery(query.id, {
-      //     text: `Event was succesfully added to community space`,
-      //   });
-      // } else {
-      //   bot.answerCallbackQuery(query.id, {
-      //     text: `There is no such event to update`,
-      //   });
-      // }
-      // await BotHelper.deleteMessage(
-      //   bot,
-      //   chatId,
-      //   true,
-      //   msgId,
-      //   DELAY_DELETE.IMMEDIATELY
-      // );
+      if (updatedEvent) {
+        bot.answerCallbackQuery(query.id, {
+          text: `Event was succesfully added to community space`,
+        });
+      } else {
+        bot.answerCallbackQuery(query.id, {
+          text: `There is no such event to update`,
+        });
+      }
+      await BotHelper.deleteMessage(
+        bot,
+        chatId,
+        true,
+        msgId,
+        DELAY_DELETE.IMMEDIATELY
+      );
     }
   } else if (query.data === "decline_event") {
     const exctractedId = await EventService.extractEventid(query.message.text);
