@@ -43,9 +43,6 @@ class EventController {
             reject(new Error(`Unexpected status code: ${response.statusCode}`));
           } else {
             const result = JSON.parse(body);
-            console.log("//////");
-            console.log(result.data);
-            console.log("//////");
             resolve(result.data);
           }
         });

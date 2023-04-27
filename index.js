@@ -814,25 +814,22 @@ bot.on("callback_query", async (query) => {
     if (exctractedId && exctractedId.length) {
       const id = exctractedId[0];
       const deletedEvent = await EventController.deleteEvent(API_URL, id);
-
-      console.log(deletedEvent);
-
-      // if (deletedEvent) {
-      //   bot.answerCallbackQuery(query.id, {
-      //     text: `Event was declined and deleted`,
-      //   });
-      // } else {
-      //   bot.answerCallbackQuery(query.id, {
-      //     text: `Event was already deleted`,
-      //   });
-      // }
-      // await BotHelper.deleteMessage(
-      //   bot,
-      //   chatId,
-      //   true,
-      //   msgId,
-      //   DELAY_DELETE.IMMEDIATELY
-      // );
+      if (deletedEvent) {
+        bot.answerCallbackQuery(query.id, {
+          text: `Event was declined and deleted`,
+        });
+      } else {
+        bot.answerCallbackQuery(query.id, {
+          text: `Event was already deleted`,
+        });
+      }
+      await BotHelper.deleteMessage(
+        bot,
+        chatId,
+        true,
+        msgId,
+        DELAY_DELETE.IMMEDIATELY
+      );
     }
   }
 
