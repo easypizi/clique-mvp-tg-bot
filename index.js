@@ -155,6 +155,21 @@ if (process.env.NODE_ENV === "production") {
     try {
       const data = req.body;
 
+      const icsData = `BEGIN:VCALENDAR
+VERSION:2.0
+BEGIN:VEVENT
+URL:tolstov.me
+DTSTART:20230427T204000Z
+DTEND:20230427T214000Z
+SUMMARY:Таро под пивчик
+DESCRIPTION:Прекрасный эвент который будет проходить в онлайне. \\nТолько представьте вы в онлайне, сидите в вашем удобном кресле перед компьютером и слушаете про свою судьбу. \\nИ заливаете душевные травмы холодненьким пивком. 
+END:VEVENT
+END:VCALENDAR`;
+
+      const dataUri = `data:text/calendar;charset=utf8,${encodeURIComponent(
+        icsData
+      )}`;
+
       console.log(data);
 
       // const inlineKeyboardButton = {
@@ -166,7 +181,7 @@ if (process.env.NODE_ENV === "production") {
       //   inline_keyboard: [[inlineKeyboardButton]],
       // };
 
-      bot.sendDocument(data.chatId, data.fileUrl, {
+      bot.sendDocument(data.chatId, dataUri, {
         fileName: "event.ics",
         mimeType: "text/calendar",
       });
