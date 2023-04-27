@@ -155,19 +155,10 @@ if (process.env.NODE_ENV === "production") {
     try {
       const data = req.body;
 
-      console.log(data);
-
-      console.log(data.fileUrl);
-      console.log(Buffer.from(data.fileUrl));
-
-      // await BotHelper.send(
-      //   bot,
-      //   data.chatId,
-      //   `[${data.fileUrl}](${data.fileName})`,
-      //   {
-      //     parse_mode: "Markdown",
-      //   }
-      // );
+      bot.sendDocument(chatId, Buffer.from(data.fileUrl), {
+        filename: "event.ics",
+        contentType: "text/calendar",
+      });
 
       res.status(200).send({ status: "success" });
     } catch (error) {
