@@ -18,7 +18,7 @@ class EventController {
 
   async deleteEvent(api_url, id) {
     try {
-      const delete_endpoint = `${api_url}/update-event/${id}`;
+      const delete_endpoint = `${api_url}/delete-event/${id}`;
       request.delete(delete_endpoint);
     } catch (error) {
       console.error(
