@@ -170,7 +170,8 @@ END:VCALENDAR`;
         icsData
       )}`;
 
-      console.log(data);
+      console.log(data.fileUrl);
+      console.log(dataUri);
 
       // const inlineKeyboardButton = {
       //   text: data.fileName,
