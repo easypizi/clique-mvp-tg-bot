@@ -20,8 +20,8 @@ class EventController {
                 new Error(`Unexpected status code: ${response.statusCode}`)
               );
             } else {
-              const data = JSON.parse(body);
-              console.log(data);
+              // const data = JSON.parse(body);
+              console.log(body);
               // resolve(data);
             }
           }
@@ -44,8 +44,8 @@ class EventController {
           } else if (response.statusCode !== 200) {
             reject(new Error(`Unexpected status code: ${response.statusCode}`));
           } else {
-            const data = JSON.parse(body);
-            console.log(data);
+            // const data = JSON.parse(body);
+            console.log(body);
             // resolve(data);
           }
         });
