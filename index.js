@@ -166,7 +166,7 @@ if (process.env.NODE_ENV === "production") {
       //   inline_keyboard: [[inlineKeyboardButton]],
       // };
 
-      bot.sendDocument(chatId, data.fileUrl, {
+      bot.sendDocument(data.chatId, data.fileUrl, {
         fileName: "event.ics",
         mimeType: "text/calendar",
       });
