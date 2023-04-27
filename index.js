@@ -800,7 +800,8 @@ bot.on("callback_query", async (query) => {
       // );
 
       const id = exctractedId[0];
-      await EventController.updateEvent(API_URL, id);
+      const updatedEvent = await EventController.updateEvent(API_URL, id);
+      console.log(updatedEvent);
       bot.answerCallbackQuery(query.id, {
         text: `Event was succesfully added to community space`,
       });
@@ -817,7 +818,8 @@ bot.on("callback_query", async (query) => {
       //   DELAY_DELETE.IMMEDIATELY
       // );
       const id = exctractedId[0];
-      await EventController.deleteEvent(API_URL, id);
+      const deletedEvent = await EventController.deleteEvent(API_URL, id);
+      console.log(deletedEvent);
       bot.answerCallbackQuery(query.id, {
         text: `Event was declined and deleted`,
       });
