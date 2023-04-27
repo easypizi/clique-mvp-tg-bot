@@ -134,7 +134,7 @@ if (process.env.NODE_ENV === "production") {
           : ""
       }`;
 
-      const linkToEvent = `[Link to event](${data.event_location.link})`;
+      const linkToEvent = `[Link to event](${data.event_link})`;
 
       const eventAgendaMessage = `||${data.event_id}||\n\n${
         data.event_organizer_credentials
@@ -144,7 +144,7 @@ if (process.env.NODE_ENV === "production") {
         data.event_description
       }\n\n*DATE and TIME:* ${data.event_date}\n*TYPE:* ${
         data.event_is_offline ? "Offline" : "Online"
-      }\n${data.event_is_offline ? "*Address: *" : "*Link:* "}\n${
+      }\n${data.event_is_offline ? "*Address: *" : "*Link:* "}${
         data.event_is_offline ? address : linkToEvent
       }\n\n${tags}`;
 
