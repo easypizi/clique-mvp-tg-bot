@@ -18,6 +18,7 @@ import UserController from "./src/controllers/UserController.js";
 import SpaceController from "./src/controllers/SpaceController.js";
 import GroupController from "./src/controllers/GroupController.js";
 import MessageController from "./src/controllers/MessageController.js";
+import EventController from "./src/controllers/EventController.js";
 
 import {
   DELAY_DELETE,
@@ -784,6 +785,14 @@ bot.on("callback_query", async (query) => {
   const chatId = await BotHelper.getChatIdByMessage(query?.message);
   const userId = await BotHelper.getUserIdByMessage(query);
   const msgId = await BotHelper.getMsgId(query.message);
+
+  if (query.data === "accept_event") {
+    console.log("ACCEPT");
+    console.log(query);
+  } else if (query.data === "decline_event") {
+    console.log("Decline");
+    console.log(query);
+  }
 
   if (query.data === "correct_space_information") {
     await BotHelper.deleteMessage(
