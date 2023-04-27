@@ -154,7 +154,23 @@ if (process.env.NODE_ENV === "production") {
   app.post("/add-to-calendar", async (req, res) => {
     try {
       const data = req.body;
+
       console.log(data);
+
+      const inlineKeyboardButton = {
+        text: data.fileName,
+        url: data.fileUrl,
+      };
+
+      const inlineKeyboard = {
+        inline_keyboard: [[inlineKeyboardButton]],
+      };
+
+      await BotHelper.send(bot, data.chatId, "add to calendar", {
+        reply_markup: inlineKeyboard,
+        parse_mode: "Markdown",
+      });
+
       res.status(200).send({ status: "success" });
     } catch (error) {
       console.log(error);
