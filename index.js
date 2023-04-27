@@ -157,8 +157,8 @@ if (process.env.NODE_ENV === "production") {
 
       console.log(data);
 
-      console.log(data.fuleUrl);
-      console.log(Buffer.from(data.fuleUrl));
+      console.log(data.fileUrl);
+      console.log(Buffer.from(data.fileUrl));
 
       // await BotHelper.send(
       //   bot,
