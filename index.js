@@ -130,7 +130,7 @@ if (process.env.NODE_ENV === "production") {
         data.event_location.city
       }, ${data.event_location.address}\n\n${
         data.event_location.geo.length
-          ? "*Map link:* " + data.event_location.geo
+          ? "*Map link:* " + `[Click to open](${data.event_location.geo})`
           : ""
       }`;
 
