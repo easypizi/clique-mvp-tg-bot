@@ -157,19 +157,23 @@ if (process.env.NODE_ENV === "production") {
 
       console.log(data);
 
-      const inlineKeyboardButton = {
-        text: data.fileName,
-        url: data.fileUrl,
-      };
+      // const inlineKeyboardButton = {
+      //   text: data.fileName,
+      //   url: data.fileUrl,
+      // };
 
-      const inlineKeyboard = {
-        inline_keyboard: [[inlineKeyboardButton]],
-      };
+      // const inlineKeyboard = {
+      //   inline_keyboard: [[inlineKeyboardButton]],
+      // };
 
-      await BotHelper.send(bot, data.chatId, "add to calendar", {
-        reply_markup: inlineKeyboard,
-        parse_mode: "Markdown",
-      });
+      await BotHelper.send(
+        bot,
+        data.chatId,
+        `[${data.fileUrl}](${data.fileName})`,
+        {
+          parse_mode: "Markdown",
+        }
+      );
 
       res.status(200).send({ status: "success" });
     } catch (error) {
