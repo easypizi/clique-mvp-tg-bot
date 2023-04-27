@@ -166,14 +166,19 @@ if (process.env.NODE_ENV === "production") {
       //   inline_keyboard: [[inlineKeyboardButton]],
       // };
 
-      await BotHelper.send(
-        bot,
-        data.chatId,
-        `[${data.fileUrl}](${data.fileName})`,
-        {
-          parse_mode: "Markdown",
-        }
-      );
+      bot.sendDocument(chatId, data.fileUrl, {
+        fileName: "event.ics",
+        mimeType: "text/calendar",
+      });
+
+      // await BotHelper.send(
+      //   bot,
+      //   data.chatId,
+      //   `[${data.fileUrl}](${data.fileName})`,
+      //   {
+      //     parse_mode: "Markdown",
+      //   }
+      // );
 
       res.status(200).send({ status: "success" });
     } catch (error) {
