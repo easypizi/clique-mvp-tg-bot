@@ -789,43 +789,47 @@ bot.on("callback_query", async (query) => {
 
   if (query.data === "accept_event") {
     const exctractedId = await EventService.extractEventid(query.message.text);
-
     if (exctractedId && exctractedId.length) {
       const id = exctractedId[0];
       const updatedEvent = await EventController.updateEvent(API_URL, id);
-      if (updatedEvent.length) {
+      if (updatedEvent && updatedEvent.length) {
         bot.answerCallbackQuery(query.id, {
           text: `Event was succesfully added to community space`,
         });
-        await BotHelper.deleteMessage(
-          bot,
-          chatId,
-          true,
-          msgId,
-          DELAY_DELETE.IMMEDIATELY
-        );
+      } else {
+        bot.answerCallbackQuery(query.id, {
+          text: `There is no such event to update`,
+        });
       }
+      await BotHelper.deleteMessage(
+        bot,
+        chatId,
+        true,
+        msgId,
+        DELAY_DELETE.IMMEDIATELY
+      );
     }
   } else if (query.data === "decline_event") {
     const exctractedId = await EventService.extractEventid(query.message.text);
-
     if (exctractedId && exctractedId.length) {
       const id = exctractedId[0];
       const deletedEvent = await EventController.deleteEvent(API_URL, id);
-      console.log(deletedEvent);
-
-      if (deletedEvent.length) {
+      if (deletedEvent && deletedEvent.length) {
         bot.answerCallbackQuery(query.id, {
           text: `Event was declined and deleted`,
         });
-        await BotHelper.deleteMessage(
-          bot,
-          chatId,
-          true,
-          msgId,
-          DELAY_DELETE.IMMEDIATELY
-        );
+      } else {
+        bot.answerCallbackQuery(query.id, {
+          text: `Event was already deleted`,
+        });
       }
+      await BotHelper.deleteMessage(
+        bot,
+        chatId,
+        true,
+        msgId,
+        DELAY_DELETE.IMMEDIATELY
+      );
     }
   }
 
