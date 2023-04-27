@@ -151,22 +151,6 @@ if (process.env.NODE_ENV === "production") {
     }
   });
 
-  app.post("/add-to-calendar", async (req, res) => {
-    try {
-      const data = req.body;
-
-      bot.sendDocument(data.chatId, Buffer.from(data.fileUrl), {
-        filename: "event.ics",
-        contentType: "text/calendar",
-      });
-
-      res.status(200).send({ status: "success" });
-    } catch (error) {
-      console.log(error);
-      res.status(500).send({ status: "failed" });
-    }
-  });
-
   app.post("/share-event", async (req, res) => {
     try {
       const data = req.body;
