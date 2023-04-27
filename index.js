@@ -27,6 +27,7 @@ import {
   BOT_NAME,
 } from "./src/const.js";
 import FileController from "./src/controllers/FileController.js";
+import EventService from "./src/services/EventService.js";
 
 dotenv.config();
 
@@ -788,10 +789,12 @@ bot.on("callback_query", async (query) => {
 
   if (query.data === "accept_event") {
     console.log("ACCEPT");
-    console.log(query);
+    const exctractedId = await EventService.extractEventid(query.message.text);
+    console.log(exctractedId);
   } else if (query.data === "decline_event") {
     console.log("Decline");
-    console.log(query);
+    const exctractedId = await EventService.extractEventid(query.message.text);
+    console.log(exctractedId);
   }
 
   if (query.data === "correct_space_information") {
