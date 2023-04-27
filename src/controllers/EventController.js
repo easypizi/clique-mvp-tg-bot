@@ -42,10 +42,11 @@ class EventController {
           } else if (response.statusCode !== 200) {
             reject(new Error(`Unexpected status code: ${response.statusCode}`));
           } else {
+            const result = JSON.parse(body);
             console.log("//////");
-            console.log(body);
+            console.log(result.data);
             console.log("//////");
-            // resolve(body.data);
+            resolve(result.data);
           }
         });
       });
