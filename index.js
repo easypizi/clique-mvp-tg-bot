@@ -143,7 +143,9 @@ if (process.env.NODE_ENV === "production") {
       }\n\n*DATE and TIME:* ${data.event_date}\n*TYPE:* ${
         data.event_is_offline ? "Offline" : "Online"
       }\n${data.event_is_offline ? "*Address: *" : "*Link:* "}\n${
-        data.event_is_offline ? address : data.event_location.link
+        data.event_is_offline
+          ? address
+          : `[Link to event](${data.event_location.link})`
       }\n\n${tags}`;
 
       const inlineKeyboard = {
