@@ -788,13 +788,40 @@ bot.on("callback_query", async (query) => {
   const msgId = await BotHelper.getMsgId(query.message);
 
   if (query.data === "accept_event") {
-    console.log("ACCEPT");
     const exctractedId = await EventService.extractEventid(query.message.text);
-    console.log(exctractedId);
+
+    if (exctractedId && exctractedId.length) {
+      // await BotHelper.deleteMessage(
+      //   bot,
+      //   chatId,
+      //   true,
+      //   msgId,
+      //   DELAY_DELETE.IMMEDIATELY
+      // );
+
+      const id = exctractedId[0];
+      await EventController.updateEvent(API_URL, id);
+      bot.answerCallbackQuery(query.id, {
+        text: `Event was succesfully added to community space`,
+      });
+    }
   } else if (query.data === "decline_event") {
-    console.log("Decline");
     const exctractedId = await EventService.extractEventid(query.message.text);
-    console.log(exctractedId);
+
+    if (exctractedId && exctractedId.length) {
+      // await BotHelper.deleteMessage(
+      //   bot,
+      //   chatId,
+      //   true,
+      //   msgId,
+      //   DELAY_DELETE.IMMEDIATELY
+      // );
+      const id = exctractedId[0];
+      await EventController.deleteEvent(API_URL, id);
+      bot.answerCallbackQuery(query.id, {
+        text: `Event was declined and deleted`,
+      });
+    }
   }
 
   if (query.data === "correct_space_information") {
