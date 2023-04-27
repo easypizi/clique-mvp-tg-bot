@@ -795,7 +795,7 @@ bot.on("callback_query", async (query) => {
 
       console.log(updatedEvent);
 
-      // if (updatedEvent && updatedEvent.length) {
+      // if (updatedEvent) {
       //   bot.answerCallbackQuery(query.id, {
       //     text: `Event was succesfully added to community space`,
       //   });
@@ -817,22 +817,25 @@ bot.on("callback_query", async (query) => {
     if (exctractedId && exctractedId.length) {
       const id = exctractedId[0];
       const deletedEvent = await EventController.deleteEvent(API_URL, id);
-      if (deletedEvent && deletedEvent.length) {
-        bot.answerCallbackQuery(query.id, {
-          text: `Event was declined and deleted`,
-        });
-      } else {
-        bot.answerCallbackQuery(query.id, {
-          text: `Event was already deleted`,
-        });
-      }
-      await BotHelper.deleteMessage(
-        bot,
-        chatId,
-        true,
-        msgId,
-        DELAY_DELETE.IMMEDIATELY
-      );
+
+      console.log(deletedEvent);
+
+      // if (deletedEvent && deletedEvent.length) {
+      //   bot.answerCallbackQuery(query.id, {
+      //     text: `Event was declined and deleted`,
+      //   });
+      // } else {
+      //   bot.answerCallbackQuery(query.id, {
+      //     text: `Event was already deleted`,
+      //   });
+      // }
+      // await BotHelper.deleteMessage(
+      //   bot,
+      //   chatId,
+      //   true,
+      //   msgId,
+      //   DELAY_DELETE.IMMEDIATELY
+      // );
     }
   }
 
