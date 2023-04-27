@@ -155,27 +155,10 @@ if (process.env.NODE_ENV === "production") {
     try {
       const data = req.body;
 
-      const icsString = `BEGIN:VCALENDAR
-      VERSION:2.0
-      BEGIN:VEVENT
-      URL:tolstov.me
-      DTSTART:20230427T204000Z
-      DTEND:20230427T214000Z
-      SUMMARY:Таро под пивчик
-      DESCRIPTION:Прекрасный эвент который будет проходить в онлайне. \nТолько представьте вы в онлайне, сидите в вашем удобном кресле перед компьютером и слушаете про свою судьбу. \nИ заливаете душевные травмы холодненьким пивком. 
-      END:VEVENT
-      END:VCALENDAR`;
+      console.log(data);
 
-      const calendarData = {
-        filename: "mycalendar.ics",
-        content: icsString,
-      };
-
-      bot.sendDocument(data.chatId, {
-        filename: "myfile.ics",
-        contentType: "text/calendar",
-        stream: Buffer.from(calendarData, "utf-8"),
-      });
+      console.log(data.fuleUrl);
+      console.log(Buffer.from(data.fuleUrl));
 
       // await BotHelper.send(
       //   bot,
