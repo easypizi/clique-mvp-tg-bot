@@ -155,7 +155,7 @@ if (process.env.NODE_ENV === "production") {
     try {
       const data = req.body;
 
-      bot.sendDocument(chatId, Buffer.from(data.fileUrl), {
+      bot.sendDocument(data.chatId, Buffer.from(data.fileUrl), {
         filename: "event.ics",
         contentType: "text/calendar",
       });
