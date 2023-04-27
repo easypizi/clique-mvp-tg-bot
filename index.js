@@ -820,7 +820,7 @@ bot.on("callback_query", async (query) => {
 
       console.log(deletedEvent);
 
-      // if (deletedEvent && deletedEvent.length) {
+      // if (deletedEvent) {
       //   bot.answerCallbackQuery(query.id, {
       //     text: `Event was declined and deleted`,
       //   });
