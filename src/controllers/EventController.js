@@ -9,12 +9,23 @@ class EventController {
           event_id: id,
           event_is_verified: true,
         };
-        const result = request.patch(update_endpoint, { json: updateData });
-        console.log("///UPD///");
-        console.log(JSON.parse(result).data);
-        console.log("/////////");
-
-        resolve(JSON.parse(result).data);
+        request.patch(
+          update_endpoint,
+          { json: updateData },
+          (error, response, body) => {
+            if (error) {
+              reject(error);
+            } else if (response.statusCode !== 200) {
+              reject(
+                new Error(`Unexpected status code: ${response.statusCode}`)
+              );
+            } else {
+              const data = JSON.parse(body);
+              console.log(data);
+              // resolve(data);
+            }
+          }
+        );
       });
     } catch (error) {
       console.error(
@@ -27,11 +38,17 @@ class EventController {
     try {
       return new Promise((resolve, reject) => {
         const delete_endpoint = `${api_url}/delete-event/${id}`;
-        const result = request.delete(delete_endpoint);
-        console.log("///DEL///");
-        console.log(JSON.parse(result).data);
-        console.log("/////////");
-        resolve(JSON.parse(result).data);
+        request.delete(delete_endpoint, (error, response, body) => {
+          if (error) {
+            reject(error);
+          } else if (response.statusCode !== 200) {
+            reject(new Error(`Unexpected status code: ${response.statusCode}`));
+          } else {
+            const data = JSON.parse(body);
+            console.log(data);
+            // resolve(data);
+          }
+        });
       });
     } catch (error) {
       console.error(
