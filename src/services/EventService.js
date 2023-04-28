@@ -10,6 +10,10 @@ class EventService {
   }
 
   prepareEventMessageToPublish(data) {
+    if (!data) {
+      return "";
+    }
+
     const tags = data?.event_tags?.length
       ? data.event_tags
           .replaceAll(" ", "")
