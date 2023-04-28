@@ -158,11 +158,12 @@ if (process.env.NODE_ENV === "production") {
       const eventData = await EventController.getEvent(API_URL, event_id);
 
       if (eventData) {
+        console.log(eventData);
+        console.log("-------------");
         const preparedMessage =
           EventService.prepareEventMessageToPublish(eventData);
         res.status(200).send({ status: "success" });
-
-        console.log(eventData);
+        console.log(preparedMessage);
       }
     } catch (error) {
       console.log(error);

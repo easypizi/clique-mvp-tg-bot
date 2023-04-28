@@ -10,7 +10,7 @@ class EventService {
   }
 
   prepareEventMessageToPublish(data) {
-    const tags = data?.event_tags.length
+    const tags = data?.event_tags?.length
       ? data.event_tags
           .replaceAll(" ", "")
           .split(",")
