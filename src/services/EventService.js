@@ -32,7 +32,7 @@ class EventService {
 
     const organizer = `${data.event_organizer_credentials} (${data.event_organizer_telegram_link})`;
 
-    const eventMessage = `*${data.event_name}*\n\n${
+    const eventMessage = `*${data.event_name}*\n${
       data.event_description
     }\n\n*DATE and TIME:* ${data.event_date}\n*TYPE:* ${
       data.event_is_offline ? "Offline" : "Online"

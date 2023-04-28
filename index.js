@@ -162,7 +162,9 @@ if (process.env.NODE_ENV === "production") {
           EventService.prepareEventMessageToPublish(eventData);
 
         groups_to_share.forEach(async (groupId) => {
-          await BotHelper.send(bot, groupId, preparedMessage);
+          await BotHelper.send(bot, groupId, preparedMessage, {
+            parse_mode: "Markdown",
+          });
         });
 
         res.status(200).send({ status: "success" });
