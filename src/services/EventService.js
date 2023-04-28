@@ -30,8 +30,6 @@ class EventService {
     }`;
     const linkToEvent = `[Link to event](${data.event_link})`;
 
-    console.log(linkToEvent);
-
     const organizer = `${
       data.event_organizer_credentials
     } (${data.event_organizer_telegram_link.replaceAll("_", "\\_")})`;
@@ -48,11 +46,11 @@ class EventService {
   }
 
   prepareEventMessageToAdminCheck(data) {
-    const tags = data?.event_tags.length
+    const tags = data?.event_tags?.length
       ? data.event_tags
           .replaceAll(" ", "")
           .split(",")
-          .map((tag) => `#${tag}`)
+          .map((tag) => `#${tag.replaceAll("-", "\\_")}`)
           .join(" ")
       : "";
     const address = `${data.event_location.country}, ${
@@ -65,17 +63,19 @@ class EventService {
 
     const linkToEvent = `[Link to event](${data.event_link})`;
 
-    const eventAgendaMessage = `||${data.event_id}||\n\n${
+    const organizer = `${
       data.event_organizer_credentials
-    } (${
-      data.event_organizer_telegram_link
-    }) want to publish information about event:\n\n*${data.event_name}*\n\n${
-      data.event_description
-    }\n\n*DATE and TIME:* ${data.event_date}\n*TYPE:* ${
-      data.event_is_offline ? "Offline" : "Online"
-    }\n${data.event_is_offline ? "*Address: *" : "*Link:* "}${
-      data.event_is_offline ? address : linkToEvent
-    }\n\n${tags}`;
+    } (${data.event_organizer_telegram_link.replaceAll("_", "\\_")})`;
+
+    const eventAgendaMessage = `||${
+      data.event_id
+    }||\n\n${organizer} want to publish information about event:\n\n*${
+      data.event_name
+    }*\n\n${data.event_description}\n\n*DATE and TIME:* ${
+      data.event_date
+    }\n*TYPE:* ${data.event_is_offline ? "Offline" : "Online"}\n${
+      data.event_is_offline ? "*Address: *" : "*Link:* "
+    }${data.event_is_offline ? address : linkToEvent}\n\n${tags}`;
 
     return eventAgendaMessage;
   }
