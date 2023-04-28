@@ -9,7 +9,37 @@ class EventService {
     return result;
   }
 
-  prepareEventMessageToChatSending(data) {
+  prepareEventMessageToPublish(data) {
+    const tags = data?.event_tags.length
+      ? data.event_tags
+          .replaceAll(" ", "")
+          .split(",")
+          .map((tag) => `#${tag}`)
+          .join(" ")
+      : "";
+    const address = `${data.event_location.country}, ${
+      data.event_location.city
+    }, ${data.event_location.address}\n\n${
+      data.event_location.geo.length
+        ? "*Map link:* " + `[Click to open](${data.event_location.geo})`
+        : ""
+    }`;
+    const linkToEvent = `[Link to event](${data.event_link})`;
+
+    const organizer = `${data.event_organizer_credentials} (${data.event_organizer_telegram_link})`;
+
+    const eventMessage = `*${data.event_name}*\n\n${
+      data.event_description
+    }\n\n*DATE and TIME:* ${data.event_date}\n*TYPE:* ${
+      data.event_is_offline ? "Offline" : "Online"
+    }\n*CONTACTS:* ${organizer}\n${
+      data.event_is_offline ? "*Address: *" : "*Link:* "
+    }${data.event_is_offline ? address : linkToEvent}\n\n${tags}`;
+
+    return eventMessage;
+  }
+
+  prepareEventMessageToAdminCheck(data) {
     const tags = data?.event_tags.length
       ? data.event_tags
           .replaceAll(" ", "")

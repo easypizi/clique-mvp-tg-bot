@@ -123,7 +123,7 @@ if (process.env.NODE_ENV === "production") {
       const { spaceOwner } = space;
 
       const eventAgendaMessage =
-        EventService.prepareEventMessageToChatSending(data);
+        EventService.prepareEventMessageToAdminCheck(data);
 
       const inlineKeyboard = {
         inline_keyboard: [
@@ -154,14 +154,16 @@ if (process.env.NODE_ENV === "production") {
   app.post("/share-event", async (req, res) => {
     try {
       const data = req.body;
-      console.log(data);
-
       const { event_id, groups_to_share } = data;
-
       const eventData = await EventController.getEvent(API_URL, event_id);
-      console.log(eventData);
 
-      res.status(200).send({ status: "success" });
+      if (eventData) {
+        const preparedMessage =
+          EventService.prepareEventMessageToPublish(eventData);
+        res.status(200).send({ status: "success" });
+
+        console.log(eventData);
+      }
     } catch (error) {
       console.log(error);
       res.status(500).send({ status: "failed" });
