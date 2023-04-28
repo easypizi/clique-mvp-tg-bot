@@ -18,7 +18,7 @@ class EventService {
       ? data.event_tags
           .replaceAll(" ", "")
           .split(",")
-          .map((tag) => `#${tag.replaceAll("-", "_")}`)
+          .map((tag) => `#${tag.replaceAll("-", "\\_")}`)
           .join(" ")
       : "";
     const address = `${data.event_location.country}, ${
