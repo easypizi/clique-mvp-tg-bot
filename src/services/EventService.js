@@ -30,11 +30,11 @@ class EventService {
     }`;
     const linkToEvent = `[Link to event](${data.event_link})`;
 
-    // const organizer = `${data.event_organizer_credentials} (${data.event_organizer_telegram_link})`;
+    console.log(data.event_location.geo);
 
-    const organizer = "user";
+    const organizer = `${data.event_organizer_credentials} (${data.event_organizer_telegram_link})`;
 
-    const eventMessage = `*${data.event_name}*\n${
+    const eventMessage = `*${data.event_name}*\n________________________\n${
       data.event_description
     }\n\n*DATE and TIME:* ${data.event_date}\n*TYPE:* ${
       data.event_is_offline ? "Offline" : "Online"
