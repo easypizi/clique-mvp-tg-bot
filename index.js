@@ -155,6 +155,12 @@ if (process.env.NODE_ENV === "production") {
     try {
       const data = req.body;
       console.log(data);
+
+      const { event_id, groups_to_share } = data;
+
+      const eventData = await EventController.getEvent(API_URL, event_id);
+      console.log(eventData);
+
       res.status(200).send({ status: "success" });
     } catch (error) {
       console.log(error);
