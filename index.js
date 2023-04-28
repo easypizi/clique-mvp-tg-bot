@@ -161,8 +161,6 @@ if (process.env.NODE_ENV === "production") {
         const preparedMessage =
           EventService.prepareEventMessageToPublish(eventData);
 
-        console.log(preparedMessage);
-
         groups_to_share.forEach(async (groupId) => {
           await BotHelper.send(bot, groupId, preparedMessage, {
             parse_mode: "Markdown",
