@@ -18,7 +18,7 @@ class EventService {
       ? data.event_tags
           .replaceAll(" ", "")
           .split(",")
-          .map((tag) => `#${tag}`)
+          .map((tag) => `\#${tag}`)
           .join(" ")
       : "";
     const address = `${data.event_location.country}, ${
@@ -30,7 +30,7 @@ class EventService {
     }`;
     const linkToEvent = `[Link to event](${data.event_link})`;
 
-    const organizer = `${data.event_organizer_credentials} (${data.event_organizer_telegram_link})`;
+    const organizer = `${data.event_organizer_credentials} (\\${data.event_organizer_telegram_link})`;
 
     const eventMessage = `*${data.event_name}*\n${
       data.event_description
