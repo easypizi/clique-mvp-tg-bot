@@ -25,7 +25,7 @@ class EventService {
       data.event_location.city
     }, ${data.event_location.address}\n\n${
       data.event_location.geo.length
-        ? "*Map link:* " + `[Click to open](${data.event_location.geo})`
+        ? "*MAP LINK:* " + `[Click to open](${data.event_location.geo})`
         : ""
     }`;
     const linkToEvent = `[Link to event](${data.event_link})`;
@@ -39,7 +39,7 @@ class EventService {
     }\n\n*DATE and TIME:* ${data.event_date}\n*TYPE:* ${
       data.event_is_offline ? "Offline" : "Online"
     }\n*CONTACTS:* ${organizer}\n${
-      data.event_is_offline ? "*Address: *" : "*Link:* "
+      data.event_is_offline ? "*ADDRESS: *" : "*LINK:* "
     }${data.event_is_offline ? address : linkToEvent}\n\n${tags}`;
 
     return eventMessage;
@@ -57,7 +57,7 @@ class EventService {
       data.event_location.city
     }, ${data.event_location.address}\n\n${
       data.event_location.geo.length
-        ? "*Map link:* " + `[Click to open](${data.event_location.geo})`
+        ? "*MAP LINK:* " + `[Click to open](${data.event_location.geo})`
         : ""
     }`;
 
@@ -74,7 +74,7 @@ class EventService {
     }*\n\n${data.event_description}\n\n*DATE and TIME:* ${
       data.event_date
     }\n*TYPE:* ${data.event_is_offline ? "Offline" : "Online"}\n${
-      data.event_is_offline ? "*Address: *" : "*Link:* "
+      data.event_is_offline ? "*ADDRESS: *" : "*LINK:* "
     }${data.event_is_offline ? address : linkToEvent}\n\n${tags}`;
 
     return eventAgendaMessage;
