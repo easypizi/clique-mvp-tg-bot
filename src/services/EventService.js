@@ -29,9 +29,7 @@ class EventService {
     }
 
     const location = `${country}, ${city}, ${address}\n${
-      geo.length
-        ? "*MAP LINK:* " + `[Click to open](${data.event_location.geo})`
-        : ""
+      geo.length ? "*MAP LINK:* " + `[Click to open](${geo})` : ""
     }`;
 
     return location.replaceAll("_", "\\_");
