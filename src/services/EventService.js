@@ -51,7 +51,7 @@ class EventService {
       return "";
     }
 
-    const tags2 = data?.event_tags?.length
+    const tags = data?.event_tags?.length
       ? data.event_tags
           .replaceAll(" ", "")
           .split(",")
@@ -59,15 +59,13 @@ class EventService {
           .join(" ")
       : "";
 
-    console.log(tags2);
-
-    const tags = "";
+    console.log(tags);
 
     const address = `${data.event_location.country}, ${
       data.event_location.city
     }, ${data.event_location.address}\n\n${
       data.event_location.geo.length
-        ? "*MAP LINK:* " + `[Click to open]( ${data.event_location.geo} )`
+        ? "*MAP LINK:* " + `[Click to open](${data.event_location.geo})`
         : ""
     }`;
 
@@ -76,8 +74,6 @@ class EventService {
     const organizer = `${
       data.event_organizer_credentials
     } ${data.event_organizer_telegram_link.replaceAll("_", "\\_")}`;
-
-    // const organizer = "Anonymous";
 
     const eventAgendaMessage = `||${
       data.event_id

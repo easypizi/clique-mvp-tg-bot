@@ -125,8 +125,6 @@ if (process.env.NODE_ENV === "production") {
       const eventAgendaMessage =
         EventService.prepareEventMessageToAdminCheck(data);
 
-      console.log(eventAgendaMessage);
-
       const inlineKeyboard = {
         inline_keyboard: [
           [
