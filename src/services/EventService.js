@@ -94,35 +94,21 @@ class EventService {
       return "";
     }
 
-    const tags = data?.event_tags?.length
-      ? data.event_tags
-          .replaceAll(" ", "")
-          .replaceAll("_", "\\_")
-          .split(",")
-          .map((tag) => `#${tag.replaceAll("-", "\\_")}`)
-          .join(" ")
-      : "";
+    const tags = this.prepareTagsMarkdown(data?.event_tags);
+    const location = this.prepareAddressMarkdown(data.event_location);
+    const linkToEvent = this.prepareEventLinkMarkdown(data.event_link);
+    const organizer = this.prepareOrganizerMarkdown(data);
+    const description = this.prepareDescription(data.event_description);
 
-    const address = `${data.event_location.country}, ${
-      data.event_location.city
-    }, ${data.event_location.address}\n${
-      data.event_location.geo.length
-        ? "*MAP LINK:* " + `[Click to open](${data.event_location.geo})`
-        : ""
-    }`;
-    const linkToEvent = `[Link to event](${data.event_link})`;
-
-    const organizer = `${
-      data.event_organizer_credentials
-    } ${data.event_organizer_telegram_link.replaceAll("_", "\\_")}`;
-
-    const eventMessage = `*${data.event_name}*\n--------------------------\n${
-      data.event_description
-    }\n\n*DATE and TIME:* ${data.event_date}\n*TYPE:* ${
+    const eventMessage = `*${
+      data.event_name
+    }*\n--------------------------\n${description}\n\n*DATE and TIME:* ${
+      data.event_date
+    }\n*TYPE:* ${
       data.event_is_offline ? "Offline" : "Online"
     }\n*CONTACTS:* ${organizer}\n\n${
       data.event_is_offline ? "*ADDRESS: *" : "*LINK:* "
-    }${data.event_is_offline ? address : linkToEvent}\n\n${tags}`;
+    }${data.event_is_offline ? location : linkToEvent}\n\n${tags}`;
 
     return eventMessage;
   }
