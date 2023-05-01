@@ -28,13 +28,13 @@ class EventService {
       return "WORLD (Location was not provided)";
     }
 
-    const address = `${country}, ${city}, ${address}\n${
+    const location = `${country}, ${city}, ${address}\n${
       geo.length
         ? "*MAP LINK:* " + `[Click to open](${data.event_location.geo})`
         : ""
     }`;
 
-    return address.replaceAll("_", "\\_");
+    return location.replaceAll("_", "\\_");
   }
 
   prepareEventLinkMarkdown(link) {
@@ -72,7 +72,7 @@ class EventService {
     }
 
     const tags = this.prepareTagsMarkdown(data?.event_tags);
-    const address = this.prepareAddressMarkdown(data.event_location);
+    const location = this.prepareAddressMarkdown(data.event_location);
     const linkToEvent = this.prepareEventLinkMarkdown(data.event_link);
     const organizer = this.prepareOrganizerMarkdown(data);
     const description = this.prepareDescription(data.event_description);
@@ -84,7 +84,7 @@ class EventService {
     }*\n\n${description}\n\n*DATE and TIME:* ${data.event_date}\n*TYPE:* ${
       data.event_is_offline ? "Offline" : "Online"
     }\n\n${data.event_is_offline ? "*ADDRESS:* " : "*LINK:* "}${
-      data.event_is_offline ? address : linkToEvent
+      data.event_is_offline ? location : linkToEvent
     }\n\n${tags}`;
 
     return eventAgendaMessage;
