@@ -17,6 +17,7 @@ class EventService {
     const tags = data?.event_tags?.length
       ? data.event_tags
           .replaceAll(" ", "")
+          .replaceAll("_", "\\_")
           .split(",")
           .map((tag) => `#${tag.replaceAll("-", "\\_")}`)
           .join(" ")
