@@ -63,9 +63,12 @@ class EventService {
 
     const linkToEvent = `[Link to event]( ${data.event_link} )`;
 
-    const organizer = `${
-      data.event_organizer_credentials
-    } ( ${data.event_organizer_telegram_link.replaceAll("_", "\\_")} )`;
+    // const organizer = `${
+    //   data.event_organizer_credentials
+    // } ( ${data.event_organizer_telegram_link.replaceAll("_", "\\_")} )`;
+
+    // console.log()
+    const organizer = "Anonymous";
 
     const eventAgendaMessage = `||${
       data.event_id
