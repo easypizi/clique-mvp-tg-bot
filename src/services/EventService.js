@@ -21,6 +21,7 @@ class EventService {
           .map((tag) => `#${tag.replaceAll("-", "\\_")}`)
           .join(" ")
       : "";
+
     const address = `${data.event_location.country}, ${
       data.event_location.city
     }, ${data.event_location.address}\n\n${
@@ -46,13 +47,20 @@ class EventService {
   }
 
   prepareEventMessageToAdminCheck(data) {
-    const tags = data?.event_tags?.length
-      ? data.event_tags
-          .replaceAll(" ", "")
-          .split(",")
-          .map((tag) => `#${tag.replaceAll("-", "\\_")}`)
-          .join(" ")
-      : "";
+    if (!data) {
+      return "";
+    }
+
+    // const tags = data?.event_tags?.length
+    //   ? data.event_tags
+    //       .replaceAll(" ", "")
+    //       .split(",")
+    //       .map((tag) => `#${tag.replaceAll("-", "\\_")}`)
+    //       .join(" ")
+    //   : "";
+
+    const tags = "";
+
     const address = `${data.event_location.country}, ${
       data.event_location.city
     }, ${data.event_location.address}\n\n${
