@@ -75,7 +75,7 @@ class EventService {
 
     const eventAgendaMessage = `||${
       data.event_id
-    }||\n\n${organizer} want to publish information about event:\n\n*${
+    }||\n\n\\${organizer} want to publish information about event:\n\n*${
       data.event_name
     }*\n\n${data.event_description}\n\n*DATE and TIME:* ${
       data.event_date
