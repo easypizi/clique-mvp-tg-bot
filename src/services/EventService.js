@@ -15,6 +15,7 @@ class EventService {
     }
 
     return tags
+      .replaceAll("#", "")
       .replaceAll(" ", "")
       .replaceAll("_", "\\_")
       .replaceAll("-", "\\_")
@@ -61,7 +62,7 @@ class EventService {
       return "";
     }
 
-    return description.replaceAll("_", "\\_").replaceAll("@", "\\@");
+    return description.replaceAll("_", "\\_");
   }
 
   prepareEventMessageToAdminCheck(data) {
