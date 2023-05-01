@@ -55,7 +55,7 @@ class EventService {
       ? data.event_tags
           .replaceAll(" ", "")
           .split(",")
-          .map((tag) => `#${tag.replaceAll("-", "_")}`)
+          .map((tag) => `#${tag.replaceAll("-", "\\_")}`)
           .join(" ")
       : "";
 
@@ -73,12 +73,11 @@ class EventService {
 
     const linkToEvent = `[Link to event]( ${data.event_link} )`;
 
-    // const organizer = `${
-    //   data.event_organizer_credentials
-    // } ${data.event_organizer_telegram_link.replaceAll("_", "\\_")}`;
+    const organizer = `${
+      data.event_organizer_credentials
+    } ${data.event_organizer_telegram_link.replaceAll("_", "\\_")}`;
 
-    // console.log()
-    const organizer = "Anonymous";
+    // const organizer = "Anonymous";
 
     const eventAgendaMessage = `||${
       data.event_id
@@ -90,7 +89,7 @@ class EventService {
       data.event_is_offline ? "*ADDRESS:* " : "*LINK:* "
     }${data.event_is_offline ? address : linkToEvent}\n\n${tags}`;
 
-    return encodeURIComponent(eventAgendaMessage);
+    return eventAgendaMessage;
   }
 }
 
