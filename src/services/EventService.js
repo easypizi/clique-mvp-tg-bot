@@ -25,14 +25,14 @@ class EventService {
       data.event_location.city
     }, ${data.event_location.address}\n\n${
       data.event_location.geo.length
-        ? "*MAP LINK:* " + `[Click to open](${data.event_location.geo})`
+        ? "*MAP LINK:* " + `[Click to open]( ${data.event_location.geo} )`
         : ""
     }`;
-    const linkToEvent = `[Link to event](${data.event_link})`;
+    const linkToEvent = `[Link to event]( ${data.event_link} )`;
 
     const organizer = `${
       data.event_organizer_credentials
-    } (${data.event_organizer_telegram_link.replaceAll("_", "\\_")})`;
+    } ( ${data.event_organizer_telegram_link.replaceAll("_", "\\_")} )`;
 
     const eventMessage = `*${data.event_name}*\n--------------------------\n${
       data.event_description
@@ -57,25 +57,19 @@ class EventService {
       data.event_location.city
     }, ${data.event_location.address}\n\n${
       data.event_location.geo.length
-        ? "*MAP LINK:* " + `[Click to open](${data.event_location.geo})`
+        ? "*MAP LINK:* " + `[Click to open]( ${data.event_location.geo} )`
         : ""
     }`;
 
-    const linkToEvent = `[Link to event](${data.event_link})`;
-
-    console.log("------------------");
-    console.log(linkToEvent);
+    const linkToEvent = `[Link to event]( ${data.event_link} )`;
 
     const organizer = `${
       data.event_organizer_credentials
-    } (${data.event_organizer_telegram_link.replaceAll("_", "\\_")})`;
-
-    console.log(organizer);
-    console.log("-------------");
+    } ( ${data.event_organizer_telegram_link.replaceAll("_", "\\_")} )`;
 
     const eventAgendaMessage = `||${
       data.event_id
-    }||\n\n\\${organizer} want to publish information about event:\n\n*${
+    }||\n\n${organizer} want to publish information about event:\n\n*${
       data.event_name
     }*\n\n${data.event_description}\n\n*DATE and TIME:* ${
       data.event_date
@@ -85,7 +79,7 @@ class EventService {
 
     console.log(eventAgendaMessage);
 
-    return eventAgendaMessage;
+    return encodeURIComponent(eventAgendaMessage);
   }
 }
 
