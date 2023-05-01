@@ -63,9 +63,15 @@ class EventService {
 
     const linkToEvent = `[Link to event](${data.event_link})`;
 
+    console.log("------------------");
+    console.log(linkToEvent);
+
     const organizer = `${
       data.event_organizer_credentials
     } (${data.event_organizer_telegram_link.replaceAll("_", "\\_")})`;
+
+    console.log(organizer);
+    console.log("-------------");
 
     const eventAgendaMessage = `||${
       data.event_id
@@ -76,6 +82,8 @@ class EventService {
     }\n*TYPE:* ${data.event_is_offline ? "Offline" : "Online"}\n${
       data.event_is_offline ? "*ADDRESS: *" : "*LINK:* "
     }${data.event_is_offline ? address : linkToEvent}\n\n${tags}`;
+
+    console.log(eventAgendaMessage);
 
     return eventAgendaMessage;
   }
