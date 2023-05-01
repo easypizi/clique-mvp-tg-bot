@@ -125,6 +125,8 @@ if (process.env.NODE_ENV === "production") {
       const eventAgendaMessage =
         EventService.prepareEventMessageToAdminCheck(data);
 
+      console.log(eventAgendaMessage);
+
       const inlineKeyboard = {
         inline_keyboard: [
           [
@@ -139,6 +141,7 @@ if (process.env.NODE_ENV === "production") {
           ],
         ],
       };
+
       await BotHelper.send(bot, spaceOwner, eventAgendaMessage, {
         reply_markup: inlineKeyboard,
         parse_mode: "Markdown",

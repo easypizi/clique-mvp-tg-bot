@@ -26,14 +26,14 @@ class EventService {
       data.event_location.city
     }, ${data.event_location.address}\n\n${
       data.event_location.geo.length
-        ? "*MAP LINK:* " + `[Click to open]( ${data.event_location.geo} )`
+        ? "*MAP LINK:* " + `[Click to open](${data.event_location.geo})`
         : ""
     }`;
-    const linkToEvent = `[Link to event]( ${data.event_link} )`;
+    const linkToEvent = `[Link to event](${data.event_link})`;
 
     const organizer = `${
       data.event_organizer_credentials
-    } ( ${data.event_organizer_telegram_link.replaceAll("_", "\\_")} )`;
+    } ${data.event_organizer_telegram_link.replaceAll("_", "\\_")}`;
 
     const eventMessage = `*${data.event_name}*\n--------------------------\n${
       data.event_description
@@ -51,13 +51,15 @@ class EventService {
       return "";
     }
 
-    // const tags = data?.event_tags?.length
-    //   ? data.event_tags
-    //       .replaceAll(" ", "")
-    //       .split(",")
-    //       .map((tag) => `#${tag.replaceAll("-", "\\_")}`)
-    //       .join(" ")
-    //   : "";
+    const tags2 = data?.event_tags?.length
+      ? data.event_tags
+          .replaceAll(" ", "")
+          .split(",")
+          .map((tag) => `#${tag.replaceAll("-", "_")}`)
+          .join(" ")
+      : "";
+
+    console.log(tags2);
 
     const tags = "";
 
@@ -73,7 +75,7 @@ class EventService {
 
     // const organizer = `${
     //   data.event_organizer_credentials
-    // } ( ${data.event_organizer_telegram_link.replaceAll("_", "\\_")} )`;
+    // } ${data.event_organizer_telegram_link.replaceAll("_", "\\_")}`;
 
     // console.log()
     const organizer = "Anonymous";
@@ -85,10 +87,8 @@ class EventService {
     }*\n\n${data.event_description}\n\n*DATE and TIME:* ${
       data.event_date
     }\n*TYPE:* ${data.event_is_offline ? "Offline" : "Online"}\n${
-      data.event_is_offline ? "*ADDRESS: *" : "*LINK:* "
+      data.event_is_offline ? "*ADDRESS:* " : "*LINK:* "
     }${data.event_is_offline ? address : linkToEvent}\n\n${tags}`;
-
-    console.log(eventAgendaMessage);
 
     return encodeURIComponent(eventAgendaMessage);
   }
