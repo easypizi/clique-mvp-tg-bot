@@ -94,13 +94,17 @@ if (process.env.NODE_ENV === "production") {
               ? await UserController.getUser(API_URL, data[1])
               : await UserController.getUser(API_URL, data[0]);
 
-          const fullName = `*${otherUser.user_name || "Anonymous"}* *${
-            otherUser?.user_last_name || ""
-          }*`;
+          // const fullName = `*${otherUser.user_name || "Anonymous"}* *${
+          //   otherUser?.user_last_name || ""
+          // }*`;
 
-          const description = otherUser.user_description
-            ? `${otherUser.user_description}.`
-            : "Mysterious person...";
+          const fullName = "TEST";
+
+          // const description = otherUser.user_description
+          //   ? `${otherUser.user_description}.`
+          //   : "Mysterious person...";
+
+          const description = "TEST";
 
           // const tgLink = `\@${otherUser.user_telegram_link.replaceAll(
           //   "_",
