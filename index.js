@@ -98,19 +98,22 @@ if (process.env.NODE_ENV === "production") {
             otherUser?.user_last_name || ""
           }*`;
 
-          const message = `🌟 *It's a match!!!* 🌟\n\nLooks like you have something to discuss with ${fullName}\n___________________________\n Some info about your contact:\n${
-            otherUser.user_description || ""
-          }.\n\nDo not wait, text him immediately: \\@${otherUser.user_telegram_link.replaceAll(
+          const description = otherUser.user_description
+            ? `${otherUser.user_description}.`
+            : "";
+
+          const tgLink = `\\@${otherUser.user_telegram_link.replaceAll(
             "_",
             "\\_"
-          )} !\n\n*Good luck, hope this connection bring you new opportunities!*  ❤️`;
+          )}`;
 
-          console.log(fullName);
+          const message = `🌟 *It's a match!!!* 🌟\n\nLooks like you have something to discuss with ${fullName}\n___________________________\n Some info about your contact:\n${description}\n\nDo not wait, text immediately: ${tgLink} !\n\n*Good luck, hope this connection bring you new opportunities!*  ❤️`;
+
           console.log(message);
 
-          // await BotHelper.send(bot, currentUser.user_id, message, {
-          //   parse_mode: "Markdown",
-          // });
+          await BotHelper.send(bot, currentUser.user_id, message, {
+            parse_mode: "Markdown",
+          });
         });
         res.status(200).send({ status: "success" });
       }
