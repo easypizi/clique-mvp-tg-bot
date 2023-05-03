@@ -94,28 +94,17 @@ if (process.env.NODE_ENV === "production") {
               ? await UserController.getUser(API_URL, data[1])
               : await UserController.getUser(API_URL, data[0]);
 
-          // const fullName = `*${otherUser.user_name || "Anonymous"}* *${
-          //   otherUser?.user_last_name || ""
-          // }*`;
+          const fullName = `*${otherUser.user_name || "Anonymous"}* *${
+            otherUser?.user_last_name || ""
+          }*`;
 
-          const fullName = "TEST";
+          const description = otherUser.user_description
+            ? `${otherUser.user_description}.`
+            : "Mysterious person...";
 
-          // const description = otherUser.user_description
-          //   ? `${otherUser.user_description}.`
-          //   : "Mysterious person...";
+          const tgLink = `\@${otherUser.user_telegram_link}`;
 
-          const description = "TEST";
-
-          // const tgLink = `\@${otherUser.user_telegram_link.replaceAll(
-          //   "_",
-          //   "\_"
-          // )}`;
-
-          const tgLink = "link";
-
-          const message = `*It's a match!!!*\n\nLooks like you have something to discuss with ${fullName}.\n____________________________\n Some info about your contact:\n${description}\n\nDo not wait, text immediately: ${tgLink} !\n\nGood luck, hope this connection bring you new opportunities!`;
-
-          console.log(message);
+          const message = `🌟 *It's a match!!!* 🌟\n\nLooks like you have something to discuss with ${fullName}.\n____________________________\n Some info about your contact:\n${description}\n\nDo not wait, text immediately: ${tgLink} !\n\n*Good luck, hope this connection bring you new opportunities!*`;
 
           await BotHelper.send(bot, currentUser.user_id, message, {
             parse_mode: "Markdown",
