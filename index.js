@@ -94,17 +94,19 @@ if (process.env.NODE_ENV === "production") {
               ? await UserController.getUser(API_URL, data[1])
               : await UserController.getUser(API_URL, data[0]);
 
-          const message = `Hi! It's a MAAAAAATCH!!!\nLooks like you have something to discuss with ${
-            otherUser.user_name || "Anonymous"
-          } ${
+          const fullName = `*${otherUser.user_name || "Anonymous"}* *${
             otherUser?.user_last_name || ""
-          }.\n Some info about your contact:\n${
-            otherUser.user_description || ""
-          }.\n________________________________\nDo not wait, text him immediately: @${
-            otherUser.user_telegram_link
-          } !\n Good luck, hope this connection bring you new opportunities! ❤️`;
+          }*`;
 
-          await BotHelper.send(bot, currentUser.user_id, message);
+          const message = `🌟 *It's a match!!!* 🌟\n\nLooks like you have something to discuss with ${fullName}\n___________________________\n Some info about your contact:\n${
+            otherUser.user_description || ""
+          }.\n\nDo not wait, text him immediately: @${
+            otherUser.user_telegram_link
+          } !\n\n*Good luck, hope this connection bring you new opportunities!*  ❤️`;
+
+          await BotHelper.send(bot, currentUser.user_id, message, {
+            parse_mode: "Markdown",
+          });
         });
         res.status(200).send({ status: "success" });
       }
