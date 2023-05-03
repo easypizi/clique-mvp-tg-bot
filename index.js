@@ -100,9 +100,10 @@ if (process.env.NODE_ENV === "production") {
 
           const message = `🌟 *It's a match!!!* 🌟\n\nLooks like you have something to discuss with ${fullName}\n___________________________\n Some info about your contact:\n${
             otherUser.user_description || ""
-          }.\n\nDo not wait, text him immediately: @${
-            otherUser.user_telegram_link
-          } !\n\n*Good luck, hope this connection bring you new opportunities!*  ❤️`;
+          }.\n\nDo not wait, text him immediately: \\@${otherUser.user_telegram_link.replaceAll(
+            "_",
+            "\\_"
+          )} !\n\n*Good luck, hope this connection bring you new opportunities!*  ❤️`;
 
           await BotHelper.send(bot, currentUser.user_id, message, {
             parse_mode: "Markdown",
