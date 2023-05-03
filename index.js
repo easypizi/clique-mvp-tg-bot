@@ -102,12 +102,14 @@ if (process.env.NODE_ENV === "production") {
             ? `${otherUser.user_description}.`
             : "Mysterious person...";
 
-          const tgLink = `\@${otherUser.user_telegram_link.replaceAll(
-            "_",
-            "\\_"
-          )}`;
+          // const tgLink = `\@${otherUser.user_telegram_link.replaceAll(
+          //   "_",
+          //   "\\_"
+          // )}`;
 
-          const message = `🌟 *It's a match!!!* 🌟\n\nLooks like you have something to discuss with ${fullName}\n___________________________\n Some info about your contact:\n${description}\n\nDo not wait, text immediately: ${tgLink} !\n\n*Good luck, hope this connection bring you new opportunities!*  ❤️`;
+          const tgLink = "link";
+
+          const message = `\🌟 *It's a match!!!* \🌟\n\nLooks like you have something to discuss with ${fullName}\n___________________________\n Some info about your contact:\n${description}\n\nDo not wait, text immediately: ${tgLink} !\n\n*Good luck, hope this connection bring you new opportunities!*  \❤️`;
 
           console.log(message);
 
