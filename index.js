@@ -392,6 +392,10 @@ bot.onText(/\/space_login/, async (ctx) => {
 //GROUP DATA PARSING
 bot.on("my_chat_member", async (ctx) => {
   const isAdmin = ctx.new_chat_member.status === "administrator";
+
+  const isDissmissedFromAdmin =
+    ctx.old_chat_member.status === "administrator" &&
+    ctx.new_chat_member.status !== "administrator";
   const chatId = await BotHelper.getChatIdByMessage(ctx);
   const currentGroup = await GroupController.getGroup(API_URL, chatId);
   const chatType = ctx.chat.type;
@@ -436,6 +440,11 @@ bot.on("my_chat_member", async (ctx) => {
         group_id,
         group_link: inviteLink,
       });
+    }
+  } else {
+    if (isDissmissedFromAdmin) {
+      console.log("Delete group from base: ", currentGroup);
+      await GroupController.deleteGroup(API_URL, chatId);
     }
   }
 });

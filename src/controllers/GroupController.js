@@ -89,6 +89,15 @@ class GroupController {
       console.log(`Error during parsing data from Group DB on API`);
     }
   }
+
+  async deleteGroup(api_url, groupId) {
+    try {
+      const delete_group_endpoint = `${api_url}/delete-group/${groupId}`;
+      request.delete(delete_group_endpoint);
+    } catch (error) {
+      console.log(`Error during parsing data from Group DB on API`);
+    }
+  }
 }
 
 export default new GroupController();
