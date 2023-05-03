@@ -105,9 +105,12 @@ if (process.env.NODE_ENV === "production") {
             "\\_"
           )} !\n\n*Good luck, hope this connection bring you new opportunities!*  ❤️`;
 
-          await BotHelper.send(bot, currentUser.user_id, message, {
-            parse_mode: "Markdown",
-          });
+          console.log(fullName);
+          console.log(message);
+
+          // await BotHelper.send(bot, currentUser.user_id, message, {
+          //   parse_mode: "Markdown",
+          // });
         });
         res.status(200).send({ status: "success" });
       }
