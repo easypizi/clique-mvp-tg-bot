@@ -258,11 +258,16 @@ bot.onText(/\/space_create/, async (ctx) => {
           ],
         ],
       };
-      await BotHelper.send(
+      await BotHelper.sendDelete(
         bot,
         chatId,
-        `You already managing "${spaceName}" community.\n\nDo you want to edit it or delete?`,
+        `(10s) You already managing *"${spaceName.replaceAll(
+          "_",
+          "\\_"
+        )}"* community.\nDo you want to edit it or delete? Cancel operation in any moment.`,
+        DELAY_DELETE.AFTER_5_SEC * 2,
         {
+          parse_mode: "Markdown",
           reply_markup: inlineKeyboard,
         }
       );

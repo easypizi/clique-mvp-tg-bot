@@ -103,8 +103,8 @@ class BotHelper {
     bot.sendMessage(chatId, message, options);
   }
 
-  async sendDelete(bot, chatId, message, delay) {
-    bot.sendMessage(chatId, message).then((sentMsg) => {
+  async sendDelete(bot, chatId, message, delay, options = {}) {
+    bot.sendMessage(chatId, message, options).then((sentMsg) => {
       setTimeout(() => {
         bot.deleteMessage(chatId, sentMsg.message_id);
       }, delay);
