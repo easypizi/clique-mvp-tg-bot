@@ -63,7 +63,9 @@ class UserService {
   ) {
     const userUpdateFields = {
       user_id: id,
-      user_groups: [chatId.toString()],
+      user_groups: userFromDb
+        ? [...userFromDb.user_groups, chatId.toString()]
+        : [chatId.toString()],
     };
 
     if (!userFromDb) {

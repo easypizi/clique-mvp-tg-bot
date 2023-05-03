@@ -191,14 +191,14 @@ bot.on("webhook_error", (error) => {
 });
 
 // CREATING COMMUNITY SPACE
-bot.onText(/\/space_create/, async (msg) => {
+bot.onText(/\/space_create/, async (ctx) => {
   if (
-    msg.text === "/space_create" ||
-    msg.text === `/space_create@${BOT_NAME}`
+    ctx.text === "/space_create" ||
+    ctx.text === `/space_create@${BOT_NAME}`
   ) {
-    const chatId = await BotHelper.getChatIdByMessage(msg);
-    const commandMsgId = await BotHelper.getMsgId(msg);
-    const isPrivate = await BotHelper.isChatPrivate(msg);
+    const chatId = await BotHelper.getChatIdByMessage(ctx);
+    const commandMsgId = await BotHelper.getMsgId(ctx);
+    const isPrivate = await BotHelper.isChatPrivate(ctx);
     await BotHelper.deleteMessage(
       bot,
       chatId,
@@ -267,13 +267,13 @@ bot.onText(/\/space_create/, async (msg) => {
 });
 
 //ADDING NEW USER TO COMMUNITY
-bot.onText(/\/add/, async (msg) => {
-  if (msg.text === "/add" || msg.text === `/add@${BOT_NAME}`) {
-    const userName = msg.from.username;
-    const chatId = await BotHelper.getChatIdByMessage(msg);
-    const commandMsgId = await BotHelper.getMsgId(msg);
-    const isPrivate = await BotHelper.isChatPrivate(msg);
-    const userId = await BotHelper.getUserIdByMessage(msg);
+bot.onText(/\/add/, async (ctx) => {
+  if (ctx.text === "/add" || ctx.text === `/add@${BOT_NAME}`) {
+    const userName = ctx.from.username;
+    const chatId = await BotHelper.getChatIdByMessage(ctx);
+    const commandMsgId = await BotHelper.getMsgId(ctx);
+    const isPrivate = await BotHelper.isChatPrivate(ctx);
+    const userId = await BotHelper.getUserIdByMessage(ctx);
 
     await BotHelper.deleteMessage(
       bot,
@@ -328,12 +328,12 @@ bot.onText(/\/add/, async (msg) => {
 });
 
 //USER AUTHENTIFICATION
-bot.onText(/\/space_login/, async (msg) => {
-  if (msg.text === "/space_login" || msg.text === `/space_login@${BOT_NAME}`) {
-    const chatId = await BotHelper.getChatIdByMessage(msg);
-    const commandMsgId = await BotHelper.getMsgId(msg);
-    const isPrivate = await BotHelper.isChatPrivate(msg);
-    const userId = await BotHelper.getUserIdByMessage(msg);
+bot.onText(/\/space_login/, async (ctx) => {
+  if (ctx.text === "/space_login" || ctx.text === `/space_login@${BOT_NAME}`) {
+    const chatId = await BotHelper.getChatIdByMessage(ctx);
+    const commandMsgId = await BotHelper.getMsgId(ctx);
+    const isPrivate = await BotHelper.isChatPrivate(ctx);
+    const userId = await BotHelper.getUserIdByMessage(ctx);
     const storeState = await StoreService.getStoreState(chatId);
     const { current_state: isProcessing, last_command: lastCommand } =
       storeState;
@@ -390,11 +390,11 @@ bot.onText(/\/space_login/, async (msg) => {
 });
 
 //GROUP DATA PARSING
-bot.on("my_chat_member", async (msg) => {
-  const isAdmin = msg.new_chat_member.status === "administrator";
-  const chatId = await BotHelper.getChatIdByMessage(msg);
+bot.on("my_chat_member", async (ctx) => {
+  const isAdmin = ctx.new_chat_member.status === "administrator";
+  const chatId = await BotHelper.getChatIdByMessage(ctx);
   const currentGroup = await GroupController.getGroup(API_URL, chatId);
-  const chatType = msg.chat.type;
+  const chatType = ctx.chat.type;
 
   if (isAdmin) {
     setTimeout(() => {
@@ -441,10 +441,10 @@ bot.on("my_chat_member", async (msg) => {
 });
 
 //ADD NEW USERS TO COMMUNITY AUTOMATICALLY ON ADDING TO THE ANY CHATS
-bot.on("new_chat_members", async (msg) => {
-  const newMembers = msg.new_chat_members;
+bot.on("new_chat_members", async (ctx) => {
+  const newMembers = ctx.new_chat_members;
 
-  const chatId = await BotHelper.getChatIdByMessage(msg);
+  const chatId = await BotHelper.getChatIdByMessage(ctx);
 
   newMembers.forEach(async (member) => {
     if (member.is_bot) {
@@ -482,13 +482,54 @@ bot.on("new_chat_members", async (msg) => {
   });
 });
 
+//CHECK PROMOTIONS AND DISMISSING OF THE USERS
+bot.on("chat_member", async (ctx) => {
+  const isBot = ctx.from.is_bot;
+  const isDissmissed =
+    ctx?.old_chat_member?.status === "administrator" &&
+    ctx?.new_chat_member?.status !== "administrator";
+  const isPromoted =
+    ctx?.old_chat_member?.status !== "administrator" &&
+    ctx?.new_chat_member?.status === "administrator";
+  if ((isDissmissed || isPromoted) && !isBot) {
+    const chatId = await BotHelper.getChatIdByMessage(ctx);
+    const groupAdmins = await BotHelper.getAdministrators(bot, chatId);
+    const chatData = await BotHelper.getChatData(bot, chatId);
+    await GroupController.UpdateGroupData(bot, API_URL, {
+      group_id: chatData.id,
+      group_admins_id: groupAdmins,
+    });
+  }
+});
+
+//REMOVE GROUP FROM USER GROUPS IF HE LEAVED GROUP
+bot.on("left_chat_member", async (ctx) => {
+  const kickedUser = ctx?.left_chat_participant ?? ctx?.left_chat_member;
+  if (kickedUser.is_bot) {
+    return;
+  }
+  const chatId = await BotHelper.getChatIdByMessage(ctx);
+  const userId = kickedUser.id;
+  const userFromDB = await UserController.getUser(API_URL, userId);
+  if (userFromDB) {
+    const preparedData = {
+      user_id: userId,
+      user_groups: userFromDB.user_groups.filter(
+        (group) => group !== chatId.toString()
+      ),
+    };
+
+    await UserController.UpdateUserData(bot, API_URL, preparedData);
+  }
+});
+
 //OPEN APP
-bot.onText(/\/open_app/, async (msg) => {
-  if (msg.text === "/open_app" || msg.text === `/open_app@${BOT_NAME}`) {
-    const chatId = await BotHelper.getChatIdByMessage(msg);
-    const commandMsgId = await BotHelper.getMsgId(msg);
-    const isPrivate = await BotHelper.isChatPrivate(msg);
-    const userId = await BotHelper.getUserIdByMessage(msg);
+bot.onText(/\/open_app/, async (ctx) => {
+  if (ctx.text === "/open_app" || ctx.text === `/open_app@${BOT_NAME}`) {
+    const chatId = await BotHelper.getChatIdByMessage(ctx);
+    const commandMsgId = await BotHelper.getMsgId(ctx);
+    const isPrivate = await BotHelper.isChatPrivate(ctx);
+    const userId = await BotHelper.getUserIdByMessage(ctx);
 
     const { current_state: isProcessing, last_command: lastCommand } =
       await StoreService.getStoreState(chatId);
@@ -556,11 +597,11 @@ bot.onText(/\/open_app/, async (msg) => {
 });
 
 //HELP COMMAND
-bot.onText(/\/help/, async (msg) => {
-  if (msg.text === "/help" || msg.text === `/help@${BOT_NAME}`) {
-    const isPrivate = await BotHelper.isChatPrivate(msg);
-    const chatId = await BotHelper.getChatIdByMessage(msg);
-    const msgId = await BotHelper.getMsgId(msg);
+bot.onText(/\/help/, async (ctx) => {
+  if (ctx.text === "/help" || ctx.text === `/help@${BOT_NAME}`) {
+    const isPrivate = await BotHelper.isChatPrivate(ctx);
+    const chatId = await BotHelper.getChatIdByMessage(ctx);
+    const msgId = await BotHelper.getMsgId(ctx);
 
     await BotHelper.deleteMessage(
       bot,
@@ -580,15 +621,15 @@ bot.onText(/\/help/, async (msg) => {
   }
 });
 
-bot.on("channel_post", async (msg) => {
-  if (msg.text && msg.text.includes("#")) {
-    const chatId = await BotHelper.getChatIdByMessage(msg);
-    const msgText = msg.text;
-    const userName = msg.author_signature ?? "Anonymous";
-    const link = await BotHelper.getMsgLink(msg);
-    const msgId = await BotHelper.getMsgId(msg);
-    const tags = await BotHelper.extractHashtags(msg.text);
-    const date = await BotHelper.getMsgDate(msg);
+bot.on("channel_post", async (ctx) => {
+  if (ctx.text && ctx.text.includes("#")) {
+    const chatId = await BotHelper.getChatIdByMessage(ctx);
+    const msgText = ctx.text;
+    const userName = ctx.author_signature ?? "Anonymous";
+    const link = await BotHelper.getMsgLink(ctx);
+    const msgId = await BotHelper.getMsgId(ctx);
+    const tags = await BotHelper.extractHashtags(ctx.text);
+    const date = await BotHelper.getMsgDate(ctx);
 
     const preparedData = await MessageService.formatData({
       chatId,
@@ -604,15 +645,15 @@ bot.on("channel_post", async (msg) => {
   }
 });
 
-bot.on("edited_channel_post", async (msg) => {
-  if (msg.text && msg.text.includes("#")) {
-    const chatId = await BotHelper.getChatIdByMessage(msg);
-    const msgText = msg.text;
-    const userName = msg.author_signature ?? "Anonymous";
-    const link = await BotHelper.getMsgLink(msg);
-    const msgId = await BotHelper.getMsgId(msg);
-    const tags = await BotHelper.extractHashtags(msg.text);
-    const date = await BotHelper.getMsgDate(msg);
+bot.on("edited_channel_post", async (ctx) => {
+  if (ctx.text && ctx.text.includes("#")) {
+    const chatId = await BotHelper.getChatIdByMessage(ctx);
+    const msgText = ctx.text;
+    const userName = ctx.author_signature ?? "Anonymous";
+    const link = await BotHelper.getMsgLink(ctx);
+    const msgId = await BotHelper.getMsgId(ctx);
+    const tags = await BotHelper.extractHashtags(ctx.text);
+    const date = await BotHelper.getMsgDate(ctx);
 
     const preparedData = await MessageService.formatData({
       chatId,
@@ -629,14 +670,14 @@ bot.on("edited_channel_post", async (msg) => {
 });
 
 //ALL INLINE MESSAGES HANDLER
-bot.on("message", async (msg) => {
-  const isFromBot = await BotHelper.checkIsFromBot(msg);
-  const isPrivate = await BotHelper.isChatPrivate(msg);
-  const isCommand = msg.pinned_message
-    ? msg?.pinned_message?.text.startsWith("/")
-    : msg?.text?.startsWith("/");
-  const isPinnedMessage = msg?.pinned_message;
-  const chatId = await BotHelper.getChatIdByMessage(msg);
+bot.on("message", async (ctx) => {
+  const isFromBot = await BotHelper.checkIsFromBot(ctx);
+  const isPrivate = await BotHelper.isChatPrivate(ctx);
+  const isCommand = ctx.pinned_message
+    ? ctx?.pinned_message?.text.startsWith("/")
+    : ctx?.text?.startsWith("/");
+  const isPinnedMessage = ctx?.pinned_message;
+  const chatId = await BotHelper.getChatIdByMessage(ctx);
   const { current_state: currentState, community_data } =
     await StoreService.getStoreState(chatId);
 
@@ -647,7 +688,7 @@ bot.on("message", async (msg) => {
     !isPinnedMessage
   ) {
     if (!community_data.name) {
-      await StoreService.updateCommunityName(chatId, msg.text);
+      await StoreService.updateCommunityName(chatId, ctx.text);
       await StoreService.updateCurrentState(
         chatId,
         BOT_STATE_MANAGER_MAPPING.SPACE_EDIT_NAME
@@ -670,7 +711,7 @@ bot.on("message", async (msg) => {
     !isPinnedMessage
   ) {
     if (!community_data.description) {
-      await StoreService.updateCommunityDescription(chatId, msg.text);
+      await StoreService.updateCommunityDescription(chatId, ctx.text);
       await StoreService.updateCurrentState(
         chatId,
         BOT_STATE_MANAGER_MAPPING.SPACE_EDIT_DESCRIPTION
@@ -709,18 +750,18 @@ bot.on("message", async (msg) => {
     !isPrivate &&
     !isCommand &&
     !isPinnedMessage &&
-    msg.text &&
-    msg?.text?.includes("#")
+    ctx.text &&
+    ctx?.text?.includes("#")
   ) {
-    const msgText = msg.text;
-    const userName = `${msg?.from?.first_name ?? ""} ${
-      msg?.from?.last_name ?? ""
+    const msgText = ctx.text;
+    const userName = `${ctx?.from?.first_name ?? ""} ${
+      ctx?.from?.last_name ?? ""
     }`;
-    const userId = await BotHelper.getUserIdByMessage(msg);
-    const link = await BotHelper.getMsgLink(msg);
-    const msgId = await BotHelper.getMsgId(msg);
-    const tags = await BotHelper.extractHashtags(msg.text);
-    const date = await BotHelper.getMsgDate(msg);
+    const userId = await BotHelper.getUserIdByMessage(ctx);
+    const link = await BotHelper.getMsgLink(ctx);
+    const msgId = await BotHelper.getMsgId(ctx);
+    const tags = await BotHelper.extractHashtags(ctx.text);
+    const date = await BotHelper.getMsgDate(ctx);
     const userPhoto = await UserService.getUserPhotoFromTg(bot, userId, token);
 
     const preparedData = await MessageService.formatData({
@@ -739,30 +780,30 @@ bot.on("message", async (msg) => {
   }
 });
 
-bot.on("edited_message", async (msg) => {
-  const isPrivate = await BotHelper.isChatPrivate(msg);
-  const isCommand = msg.pinned_message
-    ? msg?.pinned_message?.text.startsWith("/")
-    : msg?.text?.startsWith("/");
-  const isPinnedMessage = msg?.pinned_message;
+bot.on("edited_message", async (ctx) => {
+  const isPrivate = await BotHelper.isChatPrivate(ctx);
+  const isCommand = ctx.pinned_message
+    ? ctx?.pinned_message?.text.startsWith("/")
+    : ctx?.text?.startsWith("/");
+  const isPinnedMessage = ctx?.pinned_message;
 
   if (
     !isPrivate &&
     !isCommand &&
     !isPinnedMessage &&
-    msg.text &&
-    msg?.text?.includes("#")
+    ctx.text &&
+    ctx?.text?.includes("#")
   ) {
-    const chatId = await BotHelper.getChatIdByMessage(msg);
-    const msgText = msg.text;
-    const userName = `${msg?.from?.first_name ?? ""} ${
-      msg?.from?.last_name ?? ""
+    const chatId = await BotHelper.getChatIdByMessage(ctx);
+    const msgText = ctx.text;
+    const userName = `${ctx?.from?.first_name ?? ""} ${
+      ctx?.from?.last_name ?? ""
     }`;
-    const userId = await BotHelper.getUserIdByMessage(msg);
-    const link = await BotHelper.getMsgLink(msg);
-    const msgId = await BotHelper.getMsgId(msg);
-    const tags = await BotHelper.extractHashtags(msg.text);
-    const date = await BotHelper.getMsgDate(msg);
+    const userId = await BotHelper.getUserIdByMessage(ctx);
+    const link = await BotHelper.getMsgLink(ctx);
+    const msgId = await BotHelper.getMsgId(ctx);
+    const tags = await BotHelper.extractHashtags(ctx.text);
+    const date = await BotHelper.getMsgDate(ctx);
     const userPhoto = await UserService.getUserPhotoFromTg(bot, userId, token);
 
     const preparedData = await MessageService.formatData({
@@ -1026,10 +1067,10 @@ bot.on("callback_query", async (query) => {
   }
 });
 
-bot.on("audio", async (msg) => {
-  const isPrivate = await BotHelper.isChatPrivate(msg);
-  const chatId = await BotHelper.getChatIdByMessage(msg);
-  const msgId = await BotHelper.getMsgId(msg);
+bot.on("audio", async (ctx) => {
+  const isPrivate = await BotHelper.isChatPrivate(ctx);
+  const chatId = await BotHelper.getChatIdByMessage(ctx);
+  const msgId = await BotHelper.getMsgId(ctx);
 
   if (isPrivate) {
     const space = await SpaceController.getSpace(API_URL, chatId);
@@ -1044,7 +1085,7 @@ bot.on("audio", async (msg) => {
       const { current_state: state } = await StoreService.getStoreState(chatId);
 
       const { spaceName, spaceId } = space;
-      const file = msg?.audio ?? null;
+      const file = ctx?.audio ?? null;
 
       if (state) {
         await BotHelper.send(
@@ -1111,10 +1152,10 @@ bot.on("audio", async (msg) => {
   }
 });
 
-bot.on("document", async (msg) => {
-  const isPrivate = await BotHelper.isChatPrivate(msg);
-  const chatId = await BotHelper.getChatIdByMessage(msg);
-  const msgId = await BotHelper.getMsgId(msg);
+bot.on("document", async (ctx) => {
+  const isPrivate = await BotHelper.isChatPrivate(ctx);
+  const chatId = await BotHelper.getChatIdByMessage(ctx);
+  const msgId = await BotHelper.getMsgId(ctx);
 
   if (isPrivate) {
     const space = await SpaceController.getSpace(API_URL, chatId);
@@ -1129,7 +1170,7 @@ bot.on("document", async (msg) => {
       const { current_state: state } = await StoreService.getStoreState(chatId);
 
       const { spaceName, spaceId } = space;
-      const file = msg?.document ?? null;
+      const file = ctx?.document ?? null;
 
       if (state) {
         await BotHelper.send(
@@ -1196,10 +1237,10 @@ bot.on("document", async (msg) => {
   }
 });
 
-bot.on("video", async (msg) => {
-  const isPrivate = await BotHelper.isChatPrivate(msg);
-  const chatId = await BotHelper.getChatIdByMessage(msg);
-  const msgId = await BotHelper.getMsgId(msg);
+bot.on("video", async (ctx) => {
+  const isPrivate = await BotHelper.isChatPrivate(ctx);
+  const chatId = await BotHelper.getChatIdByMessage(ctx);
+  const msgId = await BotHelper.getMsgId(ctx);
 
   if (isPrivate) {
     const space = await SpaceController.getSpace(API_URL, chatId);
@@ -1214,7 +1255,7 @@ bot.on("video", async (msg) => {
       const { current_state: state } = await StoreService.getStoreState(chatId);
 
       const { spaceName, spaceId } = space;
-      const file = msg?.video ?? null;
+      const file = ctx?.video ?? null;
 
       if (state) {
         await BotHelper.send(
