@@ -100,9 +100,9 @@ if (process.env.NODE_ENV === "production") {
 
           const description = otherUser.user_description
             ? `${otherUser.user_description}.`
-            : "";
+            : "Mysterious person...";
 
-          const tgLink = `\\@${otherUser.user_telegram_link.replaceAll(
+          const tgLink = `\@${otherUser.user_telegram_link.replaceAll(
             "_",
             "\\_"
           )}`;
