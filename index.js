@@ -113,7 +113,7 @@ if (process.env.NODE_ENV === "production") {
 
           const tgLink = "link";
 
-          const message = `*It's a match!!!*\n\nLooks like you have something to discuss with ${fullName}.\n___________________________\n Some info about your contact:\n${description}\n\nDo not wait, text immediately: ${tgLink} !\n\nGood luck, hope this connection bring you new opportunities!`;
+          const message = `*It's a match!!!*\n\nLooks like you have something to discuss with ${fullName}.\n____________________________\n Some info about your contact:\n${description}\n\nDo not wait, text immediately: ${tgLink} !\n\nGood luck, hope this connection bring you new opportunities!`;
 
           console.log(message);
 
