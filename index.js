@@ -196,6 +196,70 @@ bot.on("webhook_error", (error) => {
   console.log(error.code); // => 'EPARSE'
 });
 
+//DELETE USER DATA FROM SPACE OR FROM APPLICATION
+bot.onText(/\/delete/, async (ctx) => {
+  if (ctx.text === "/delete" || ctx.text === `/delete@${BOT_NAME}`) {
+    const userName = ctx.from.username;
+    const chatId = await BotHelper.getChatIdByMessage(ctx);
+    const commandMsgId = await BotHelper.getMsgId(ctx);
+    const isPrivate = await BotHelper.isChatPrivate(ctx);
+    const userId = await BotHelper.getUserIdByMessage(ctx);
+
+    await BotHelper.deleteMessage(
+      bot,
+      chatId,
+      isPrivate,
+      commandMsgId,
+      DELAY_DELETE.IMMEDIATELY
+    );
+
+    if (!isPrivate) {
+      await BotHelper.sendDelete(
+        bot,
+        chatId,
+        `If you want to delete yourself from any community, please call this command in the private chat with bot @${BOT_NAME}`,
+        DELAY_DELETE.AFTER_5_SEC
+      );
+      return;
+    }
+
+    const userData = await UserController.getUser(API_URL, userId);
+
+    if (userData && userData.user_spaces && userData.user_spaces.length) {
+      const spacesIdString = userData.user_spaces.join(",");
+
+      const spaces = await SpaceController.getUserSpacesByQueryId(
+        API_URL,
+        spacesIdString
+      );
+
+      const msgText =
+        "Hi! It is so sad 😿 to see that you want leave community. \nFrom which community you want to be deleted? \nOr you can delete your profile at all";
+
+      const inlineButtons = spaces.map((space, index) => {
+        return {
+          text: `${index + 1}. ${space.space_name}`,
+          callback_data: JSON.stringify({
+            command: "delete_from_space",
+            data: { space_id: space.space_id },
+          }),
+        };
+      });
+
+      const inlineKeyboard = {
+        inline_keyboard: [
+          inlineButtons,
+          [{ text: "🗑️ DELETE PROFILE", callback_data: "delete_user_profile" }],
+        ],
+      };
+
+      await BotHelper.send(bot, chatId, msgText, {
+        reply_markup: inlineKeyboard,
+      });
+    }
+  }
+});
+
 // CREATING COMMUNITY SPACE
 bot.onText(/\/space_create/, async (ctx) => {
   if (
@@ -329,7 +393,7 @@ bot.onText(/\/add/, async (ctx) => {
     );
 
     if (userFromDB) {
-      await UserController.UpdateUserData(bot, API_URL, preparedData);
+      await UserController.updateUserData(bot, API_URL, preparedData);
     } else {
       await UserController.addNewUser(bot, API_URL, preparedData, chatId);
     }
@@ -386,7 +450,7 @@ bot.onText(/\/space_login/, async (ctx) => {
         user_id: userId,
         user_bot_chat_id: md5(chatId.toString()),
       };
-      await UserController.UpdateUserData(bot, API_URL, updateData, chatId);
+      await UserController.updateUserData(bot, API_URL, updateData, chatId);
     } else {
       await BotHelper.send(
         bot,
@@ -447,7 +511,7 @@ bot.on("my_chat_member", async (ctx) => {
       );
       const { group_id } = currentGroup;
       const inviteLink = await BotHelper.getInviteLink(bot, chatId);
-      await GroupController.UpdateGroupData(bot, API_URL, {
+      await GroupController.updateGroupData(bot, API_URL, {
         group_id,
         group_link: inviteLink,
       });
@@ -495,7 +559,7 @@ bot.on("new_chat_members", async (ctx) => {
     );
 
     if (userFromDB) {
-      await UserController.UpdateUserData(bot, API_URL, preparedData);
+      await UserController.updateUserData(bot, API_URL, preparedData);
     } else {
       await UserController.addNewUser(bot, API_URL, preparedData, chatId);
     }
@@ -515,7 +579,7 @@ bot.on("chat_member", async (ctx) => {
     const chatId = await BotHelper.getChatIdByMessage(ctx);
     const groupAdmins = await BotHelper.getAdministrators(bot, chatId);
     const chatData = await BotHelper.getChatData(bot, chatId);
-    await GroupController.UpdateGroupData(bot, API_URL, {
+    await GroupController.updateGroupData(bot, API_URL, {
       group_id: chatData.id,
       group_admins_id: groupAdmins,
     });
@@ -539,7 +603,7 @@ bot.on("left_chat_member", async (ctx) => {
       ),
     };
 
-    await UserController.UpdateUserData(bot, API_URL, preparedData);
+    await UserController.updateUserData(bot, API_URL, preparedData);
   }
 });
 
@@ -848,7 +912,14 @@ bot.on("callback_query", async (query) => {
   const userId = await BotHelper.getUserIdByMessage(query);
   const msgId = await BotHelper.getMsgId(query.message);
 
-  if (query.data === "accept_event") {
+  let callBackData;
+  try {
+    callBackData = JSON.parse(query.data);
+  } catch (error) {
+    callBackData = query.data;
+  }
+
+  if (callBackData === "accept_event") {
     const exctractedId = await EventService.extractEventid(query.message.text);
     if (exctractedId && exctractedId.length) {
       const id = exctractedId[0];
@@ -870,7 +941,7 @@ bot.on("callback_query", async (query) => {
         DELAY_DELETE.IMMEDIATELY
       );
     }
-  } else if (query.data === "decline_event") {
+  } else if (callBackData === "decline_event") {
     const exctractedId = await EventService.extractEventid(query.message.text);
     if (exctractedId && exctractedId.length) {
       const id = exctractedId[0];
@@ -894,7 +965,7 @@ bot.on("callback_query", async (query) => {
     }
   }
 
-  if (query.data === "correct_space_information") {
+  if (callBackData === "correct_space_information") {
     await BotHelper.deleteMessage(
       bot,
       chatId,
@@ -917,7 +988,7 @@ bot.on("callback_query", async (query) => {
       await StoreService.updateCommunityId(chatId, spaceId);
       const { community_data: data } = await StoreService.getStoreState(chatId);
       const preparedData = await SpaceService.formatData(data, spaceOwner);
-      await SpaceController.UpdateSpaceData(bot, API_URL, preparedData, chatId);
+      await SpaceController.updateSpaceData(bot, API_URL, preparedData, chatId);
       bot.answerCallbackQuery(query.id, {
         text: `Your ${data.name} space was succesfully updated!`,
       });
@@ -931,7 +1002,7 @@ bot.on("callback_query", async (query) => {
       BOT_STATE_MANAGER_MAPPING.DEFAULT
     );
     await StoreService.updateLastCommand(chatId, BOT_COMMANDS.NO_COMMAND);
-  } else if (query.data === "incorrect_space_information") {
+  } else if (callBackData === "incorrect_space_information") {
     bot.editMessageText(
       `Please provide community data again with command /space_create.`,
       {
@@ -961,7 +1032,7 @@ bot.on("callback_query", async (query) => {
     await StoreService.updateLastCommand(chatId, BOT_COMMANDS.NO_COMMAND);
   }
 
-  if (query.data === "edit_community_data") {
+  if (callBackData === "edit_community_data") {
     await StoreService.updateCurrentState(
       chatId,
       BOT_STATE_MANAGER_MAPPING.CREATE_SPACE_INIT
@@ -977,7 +1048,14 @@ bot.on("callback_query", async (query) => {
       msgId,
       DELAY_DELETE.IMMEDIATELY
     );
-  } else if (query.data === "delete_community") {
+  } else if (callBackData === "delete_community") {
+    await BotHelper.deleteMessage(
+      bot,
+      chatId,
+      true,
+      msgId,
+      DELAY_DELETE.IMMEDIATELY
+    );
     const inlineKeyboard = {
       inline_keyboard: [
         [
@@ -1002,7 +1080,7 @@ bot.on("callback_query", async (query) => {
     );
   }
 
-  if (query.data === "delete_space_forever") {
+  if (callBackData === "delete_space_forever") {
     await BotHelper.deleteMessage(
       bot,
       chatId,
@@ -1019,13 +1097,13 @@ bot.on("callback_query", async (query) => {
       chatId,
       BOT_STATE_MANAGER_MAPPING.DEFAULT
     );
-    await SpaceController.DeleteSpace(bot, API_URL, chatId, chatId);
+    await SpaceController.deleteSpace(bot, API_URL, chatId, chatId);
     bot.answerCallbackQuery(query.id, {
       text: "Community space was deleted",
     });
   } else if (
-    query.data === "cancel_space_delete" ||
-    query.data === "cancel_space_create"
+    callBackData === "cancel_space_delete" ||
+    callBackData === "cancel_space_create"
   ) {
     await BotHelper.deleteMessage(
       bot,
@@ -1047,7 +1125,7 @@ bot.on("callback_query", async (query) => {
     );
   }
 
-  if (query.data === "upload_file") {
+  if (callBackData === "upload_file") {
     await BotHelper.deleteMessage(
       bot,
       chatId,
@@ -1069,7 +1147,7 @@ bot.on("callback_query", async (query) => {
       BOT_STATE_MANAGER_MAPPING.DEFAULT
     );
     await StoreService.updateLastCommand(chatId, BOT_COMMANDS.NO_COMMAND);
-  } else if (query.data === "cancel_upload") {
+  } else if (callBackData === "cancel_upload") {
     await BotHelper.deleteMessage(
       bot,
       chatId,
@@ -1084,6 +1162,121 @@ bot.on("callback_query", async (query) => {
       BOT_STATE_MANAGER_MAPPING.DEFAULT
     );
     await StoreService.updateLastCommand(chatId, BOT_COMMANDS.NO_COMMAND);
+  }
+
+  if (callBackData?.command === "delete_from_space") {
+    const user = await UserController.getUser(API_URL, userId);
+
+    if (user && user.user_spaces.length) {
+      const { space_id: spaceIdForDeleting } = callBackData.data;
+
+      const spaceForDeleting = await SpaceController.getSpace(
+        API_URL,
+        spaceIdForDeleting
+      );
+
+      if (spaceForDeleting && spaceForDeleting?.spaceGroups?.length) {
+        const { spaceGroups, spaceName } = spaceForDeleting;
+        const spaceGroupsId = spaceGroups.map((group) => group.groupId);
+
+        const filteredGroups = user.user_groups.filter(
+          (groupId) => !spaceGroupsId.includes(groupId)
+        );
+
+        const preparedData = {
+          user_id: user.user_id,
+          user_groups: filteredGroups,
+          user_spaces: user.user_spaces.filter(
+            (spaceId) => spaceId !== spaceIdForDeleting
+          ),
+        };
+
+        await UserController.updateUserData(bot, API_URL, preparedData).then(
+          () => {
+            bot.answerCallbackQuery(query.id, {
+              text: `You succesfully quit the ${spaceName} space`,
+            });
+          }
+        );
+      } else {
+        bot.answerCallbackQuery(query.id, {
+          text: `Space doesn't exists anymore`,
+        });
+      }
+    } else {
+      bot.answerCallbackQuery(query.id, {
+        text: `No spaces to quit were found`,
+      });
+    }
+
+    await BotHelper.deleteMessage(
+      bot,
+      chatId,
+      true,
+      msgId,
+      DELAY_DELETE.IMMEDIATELY
+    );
+  } else if (callBackData === "delete_user_profile") {
+    await BotHelper.deleteMessage(
+      bot,
+      chatId,
+      true,
+      msgId,
+      DELAY_DELETE.IMMEDIATELY
+    );
+    const inlineKeyboard = {
+      inline_keyboard: [
+        [
+          {
+            text: "🔪 I'm sure, DELETE ",
+            callback_data: "delete_user_forever",
+          },
+          {
+            text: "🚫 CANCEL",
+            callback_data: "cancel_user_delete",
+          },
+        ],
+      ],
+    };
+    await BotHelper.send(
+      bot,
+      chatId,
+      `ARE YOU SURE THAT YOU WANT DELETE YOUR PROFILE?`,
+      {
+        reply_markup: inlineKeyboard,
+      }
+    );
+  }
+
+  if (callBackData === "delete_user_forever") {
+    await UserController.deleteUserData(bot, API_URL, userId).then(() => {
+      bot.answerCallbackQuery(query.id, {
+        text: `Your profile was succesfully deleted`,
+      });
+    });
+
+    await BotHelper.deleteMessage(
+      bot,
+      chatId,
+      true,
+      msgId,
+      DELAY_DELETE.IMMEDIATELY
+    );
+  } else if (callBackData === "cancel_user_delete") {
+    await BotHelper.deleteMessage(
+      bot,
+      chatId,
+      true,
+      msgId,
+      DELAY_DELETE.IMMEDIATELY
+    );
+
+    await BotHelper.sendDelete(
+      bot,
+      chatId,
+      "Ok, your profile will continue exists. Thank you!",
+      DELAY_DELETE.AFTER_2_SEC
+    );
   }
 });
 

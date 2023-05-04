@@ -26,6 +26,31 @@ class SpaceController {
     }
   }
 
+  async getUserSpacesByQueryId(api_url, spacesIdString) {
+    try {
+      const get_user_spaces_endpoint = `${api_url}/user-spaces?id=${spacesIdString}`;
+
+      return new Promise((resolve, reject) => {
+        request.get(get_user_spaces_endpoint, (error, response, body) => {
+          if (error) {
+            reject(error);
+          } else if (response.statusCode !== 200) {
+            reject(new Error(`Unexpected status code: ${response.statusCode}`));
+          } else {
+            const data = JSON.parse(body);
+            if (data && data.length) {
+              resolve(data);
+            } else {
+              resolve(null);
+            }
+          }
+        });
+      });
+    } catch (error) {
+      console.log(`Error during parsing user spaces from DB on API`);
+    }
+  }
+
   async addNewSpace(bot, api_url, preparedData, chatId) {
     if (preparedData.space_id) {
       try {
@@ -57,7 +82,7 @@ class SpaceController {
     }
   }
 
-  async UpdateSpaceData(bot, api_url, preparedData, chatId) {
+  async updateSpaceData(bot, api_url, preparedData, chatId) {
     if (preparedData.space_id) {
       try {
         const update_endpoint = `${api_url}/update-space`;
@@ -90,7 +115,7 @@ class SpaceController {
     }
   }
 
-  async DeleteSpace(bot, api_url, space_id, chatId) {
+  async deleteSpace(bot, api_url, space_id, chatId) {
     if (space_id) {
       try {
         const delete_endpoint = `${api_url}/delete-space/${space_id}`;

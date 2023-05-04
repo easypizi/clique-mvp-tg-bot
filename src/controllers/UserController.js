@@ -55,7 +55,18 @@ class UserController {
     });
   }
 
-  async UpdateUserData(bot, api_url, preparedData, chatId) {
+  async deleteUserData(bot, api_url, userId) {
+    if (userId) {
+      try {
+        const delete_endpoint = `${api_url}/delete-user/${userId}`;
+        request.delete(delete_endpoint);
+      } catch (error) {
+        console.error("Error during deleting group data");
+      }
+    }
+  }
+
+  async updateUserData(bot, api_url, preparedData, chatId) {
     if (preparedData.user_id) {
       try {
         const update_endpoint = `${api_url}/update-user`;

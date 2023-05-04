@@ -6,9 +6,10 @@ export const DELAY_DELETE = {
 
 export const BOT_COMMANDS = {
   ADD_USER: "/add",
+  DELETE_COMMAND: "/delete",
   SPACE_CREATE: "/space_create",
-  OPEN_APP: "/open_app",
   SPACE_LOGIN: "/space_login",
+  OPEN_APP: "/open_app",
   NO_COMMAND: "",
 };
 

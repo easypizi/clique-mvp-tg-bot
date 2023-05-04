@@ -33,7 +33,7 @@ class GroupController {
     }
   }
 
-  async UpdateGroupData(bot, api_url, preparedData, chatId) {
+  async updateGroupData(bot, api_url, preparedData, chatId) {
     if (preparedData.group_id) {
       try {
         const update_endpoint = `${api_url}/update-group`;
@@ -95,7 +95,7 @@ class GroupController {
       const delete_group_endpoint = `${api_url}/delete-group/${groupId}`;
       request.delete(delete_group_endpoint);
     } catch (error) {
-      console.log(`Error during parsing data from Group DB on API`);
+      console.log(`Error during deleting group`);
     }
   }
 }
