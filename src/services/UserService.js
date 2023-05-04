@@ -10,7 +10,7 @@ class UserService {
       await BotHelper.sendDelete(
         bot,
         chatId,
-        `Can't parse ${userName} data.\nPlease check your privacy settings and try again.`,
+        `Не удаётся получить данные ${userName}.\nИзмените свои настройки приватности и попробуйте снова.`,
         DELAY_DELETE.AFTER_2_SEC
       );
       console.error(`Error during parsing user data. USER ID: ${userId}`);
@@ -44,7 +44,7 @@ class UserService {
         await BotHelper.sendDelete(
           bot,
           chatId,
-          `Bot can't get ${userName} profile photo.\nPlease check you privacy setting and update your information – sent command /add to this chat.`,
+          `Не удаётся получить фотографию профиля ${userName}.\nВы можете подгрузить любую аватарку внутри приложения.`,
           DELAY_DELETE.AFTER_2_SEC
         );
       }

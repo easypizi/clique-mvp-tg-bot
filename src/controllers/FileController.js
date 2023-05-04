@@ -45,14 +45,15 @@ class FileController {
             BotHelper.sendDelete(
               bot,
               chatId,
-              `File ${preparedData.file_name} was succesfully uploaded to your space!`,
+              `Файл ${preparedData.file_name} был успешно добавлен в ваше сообщество!`,
               DELAY_DELETE.AFTER_2_SEC
             );
           } else {
             BotHelper.sendDelete(
               bot,
               chatId,
-              body?.message ?? "Something went wrong, try again later",
+              body?.message ??
+                "Произошла ошибка, попробуйте повторить операцию позже",
               DELAY_DELETE.AFTER_2_SEC
             );
           }

@@ -14,14 +14,15 @@ class GroupController {
               BotHelper.sendDelete(
                 bot,
                 chatId,
-                `Group ${preparedData.group_name} succesfully added to db!`,
+                `Группа ${preparedData.group_name} успешно добавлена в базу сообществ!`,
                 2000
               );
             } else {
               BotHelper.sendDelete(
                 bot,
                 chatId,
-                body?.message ?? "Something went wrong, try again later",
+                body?.message ??
+                  "Что-то пошло не так, попробуйте повторить операцию позже",
                 2000
               );
             }
@@ -46,14 +47,15 @@ class GroupController {
                 BotHelper.sendDelete(
                   bot,
                   chatId,
-                  `Group ${preparedData.group_name} was succesfully updated!`,
+                  `Данные ${preparedData.group_name} были успешно обновлены!`,
                   2000
                 );
               } else {
                 BotHelper.sendDelete(
                   bot,
                   chatId,
-                  body?.message ?? "Something went wrong, try again later",
+                  body?.message ??
+                    "Что-то пошло не так, попробуйте повторить операцию позже",
                   2000
                 );
               }

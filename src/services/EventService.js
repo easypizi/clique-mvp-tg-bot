@@ -26,11 +26,11 @@ class EventService {
 
   prepareAddressMarkdown({ country, city, address, geo }) {
     if (!country || !city || !address) {
-      return "WORLD (Location was not provided)";
+      return "Локация неизвестна...";
     }
 
     const location = `${country}, ${city}, ${address}\n${
-      geo.length ? "*MAP LINK:* " + `[Click to open](${geo})` : ""
+      geo.length ? "*ТОЧКА НА КАРТЕ:* " + `[Нажми сюда](${geo})` : ""
     }`;
 
     return location.replaceAll("_", "\\_");
@@ -41,7 +41,7 @@ class EventService {
       return null;
     }
 
-    return `[Link to event](${link})`;
+    return `[Нажми сюда](${link})`;
   }
 
   prepareOrganizerMarkdown({
@@ -49,7 +49,7 @@ class EventService {
     event_organizer_telegram_link,
   }) {
     if (!event_organizer_credentials || !event_organizer_telegram_link) {
-      return "Anonymous";
+      return "Неизвестный организатор";
     }
 
     const result = `${event_organizer_credentials} ${event_organizer_telegram_link}`;
@@ -78,11 +78,11 @@ class EventService {
 
     const eventAgendaMessage = `||${
       data.event_id
-    }||\n\n${organizer} want to publish information about event:\n\n*${
+    }||\n\n${organizer} предлагает опубликовать данное мероприятие:\n\n*${
       data.event_name
-    }*\n\n${description}\n\n*DATE and TIME:* ${data.event_date}\n*TYPE:* ${
-      data.event_is_offline ? "Offline" : "Online"
-    }\n\n${data.event_is_offline ? "*ADDRESS:* " : "*LINK:* "}${
+    }*\n\n${description}\n\n*ДАТА и ВРЕМЯ:* ${data.event_date}\n*ВИД:* ${
+      data.event_is_offline ? "Живая встреча" : "Онлайн"
+    }\n\n${data.event_is_offline ? "*АДРЕС:* " : "*ССЫЛКА:* "}${
       data.event_is_offline ? location : linkToEvent
     }\n\n${tags}`;
 
@@ -102,12 +102,12 @@ class EventService {
 
     const eventMessage = `*${
       data.event_name
-    }*\n--------------------------\n${description}\n\n*DATE and TIME:* ${
+    }*\n--------------------------\n${description}\n\n*ДАТА и ВРЕМЯ:* ${
       data.event_date
-    }\n*TYPE:* ${
-      data.event_is_offline ? "Offline" : "Online"
-    }\n*CONTACTS:* ${organizer}\n\n${
-      data.event_is_offline ? "*ADDRESS: *" : "*LINK:* "
+    }\n*ВИД:* ${
+      data.event_is_offline ? "Живая встреча" : "Онлайн"
+    }\n*ОРГАНИЗАТОР:* ${organizer}\n\n${
+      data.event_is_offline ? "*АДРЕС: *" : "*ССЫЛКА:* "
     }${data.event_is_offline ? location : linkToEvent}\n\n${tags}`;
 
     return eventMessage;

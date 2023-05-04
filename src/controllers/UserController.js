@@ -15,14 +15,14 @@ class UserController {
               BotHelper.sendDelete(
                 bot,
                 chatId,
-                `User ${preparedData.user_telegram_link} data succesfully added!`,
+                `Пользователь "@${preparedData.user_telegram_link}" зарегистрирован`,
                 DELAY_DELETE.AFTER_2_SEC
               );
             } else {
               BotHelper.sendDelete(
                 bot,
                 chatId,
-                body?.message ?? "Something went wrong, try again later",
+                body?.message ?? "Что-то пошло не так, повторите попытку позже",
                 DELAY_DELETE.AFTER_2_SEC
               );
             }
@@ -79,14 +79,15 @@ class UserController {
                 BotHelper.sendDelete(
                   bot,
                   chatId,
-                  `You succesfully logined! \nPlease, run ${BOT_COMMANDS.OPEN_APP} command, to open application`,
+                  `Вы успешно авторизовались! \nТеперь вы можете вызвать команду ${BOT_COMMANDS.OPEN_APP}, чтобы получить персональную ссылку на приложение`,
                   DELAY_DELETE.AFTER_5_SEC
                 );
               } else {
                 BotHelper.sendDelete(
                   bot,
                   chatId,
-                  body?.message ?? "Something went wrong, try again later",
+                  body?.message ??
+                    "Что-то пошло не так, повторите попытку позже",
                   DELAY_DELETE.AFTER_2_SEC
                 );
               }

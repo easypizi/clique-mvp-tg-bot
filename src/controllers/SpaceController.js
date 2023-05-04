@@ -63,14 +63,15 @@ class SpaceController {
               BotHelper.sendDelete(
                 bot,
                 chatId,
-                `Space ${preparedData.space_name} succesfully added!`,
+                `Пространство "${preparedData.space_name}" успешно создано!`,
                 2000
               );
             } else {
               BotHelper.sendDelete(
                 bot,
                 chatId,
-                body?.message ?? "Something went wrong, try again later",
+                body?.message ??
+                  "Что-то пошло не так, попробуйте повторить операцию позже",
                 2000
               );
             }
@@ -95,14 +96,15 @@ class SpaceController {
                 BotHelper.sendDelete(
                   bot,
                   chatId,
-                  `Space ${preparedData.space_name} was succesfully updated!`,
+                  `Информация о пространстве "${preparedData.space_name}" была успешна обновлена`,
                   2000
                 );
               } else {
                 BotHelper.sendDelete(
                   bot,
                   chatId,
-                  body?.message ?? "Something went wrong, try again later",
+                  body?.message ??
+                    "Что-то пошло не так, попробуйте повторить операцию позже",
                   2000
                 );
               }
@@ -126,13 +128,13 @@ class SpaceController {
             BotHelper.send(
               bot,
               chatId,
-              `Space ${data.space_name} was succesfully deleted! SOOO SAD :(`
+              `Пространство "${data.space_name}" было удалено.`
             );
           } else {
             BotHelper.send(
               bot,
               chatId,
-              `This space was already deleted! If it was made without your attention please connect with Clique team`
+              `Такого пространства не существует. Если вы считаете что это произошло по ошибке - напишите в саппорт чат (ссылка в описании бота).`
             );
           }
         });
