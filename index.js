@@ -217,7 +217,7 @@ bot.onText(/\/delete/, async (ctx) => {
       await BotHelper.sendDelete(
         bot,
         chatId,
-        `If you want to delete yourself from any community, please call this command in the private chat with bot @${BOT_NAME}`,
+        `Если вы хотите удалить себя из любого сообщества или удалить свой профиль, вызовите эту команду в приватном диалоге с @${BOT_NAME}`,
         DELAY_DELETE.AFTER_5_SEC
       );
       return;
@@ -233,8 +233,7 @@ bot.onText(/\/delete/, async (ctx) => {
         spacesIdString
       );
 
-      const msgText =
-        "Hi! It is so sad 😿 to see that you want leave community. \nFrom which community you want to be deleted? \nOr you can delete your profile at all";
+      const msgText = `Вы можете удалить себя из любого сообщества в котором состоите, на ваш выбор. Ваши данные не будут отображаться в этом сообществе.\nКакое сообщество вы хотите покинуть?\n\nЕсли вы хотите вообще удалить свой профиль, для этого есть кнопка ниже.`;
 
       const inlineButtons = spaces.map((space, index) => {
         return {
@@ -249,7 +248,12 @@ bot.onText(/\/delete/, async (ctx) => {
       const inlineKeyboard = {
         inline_keyboard: [
           inlineButtons,
-          [{ text: "🗑️ DELETE PROFILE", callback_data: "delete_user_profile" }],
+          [
+            {
+              text: "🗑️ УДАЛИТЬ ПРОФИЛЬ",
+              callback_data: "delete_user_profile",
+            },
+          ],
         ],
       };
 
@@ -282,7 +286,7 @@ bot.onText(/\/space_create/, async (ctx) => {
       await BotHelper.sendDelete(
         bot,
         chatId,
-        `If you want create new space for community, please send\n${BOT_COMMANDS.SPACE_CREATE}\n command to the bot\nhttps://t.me/${BOT_NAME}\nin private messages`,
+        `Если вы хотите создать пространство для сообщества, пришлите\n${BOT_COMMANDS.SPACE_CREATE}\nкоманду нашему боту:\nhttps://t.me/${BOT_NAME} в приватном чате`,
         DELAY_DELETE.AFTER_5_SEC
       );
       return;
@@ -300,7 +304,7 @@ bot.onText(/\/space_create/, async (ctx) => {
       await BotHelper.send(
         bot,
         chatId,
-        `Looks like you are not managing any community. Please follow instructions to create one.\n\nProvide community name: `
+        `Похоже у вас еще нет пространства сообщества! Пожалуйста пройдите несколько шагов, чтобы создать такое пространство\n\nУкажите имя пространства для сообщества:`
       );
     } else {
       const { spaceName } = space;
@@ -308,15 +312,19 @@ bot.onText(/\/space_create/, async (ctx) => {
         inline_keyboard: [
           [
             {
-              text: "⚙️ EDIT",
+              text: "⚙️ РЕДАКТИРОВАТЬ",
               callback_data: "edit_community_data",
             },
+          ],
+          [
             {
-              text: "🔪 DELETE",
+              text: "🔪 УДАЛИТЬ",
               callback_data: "delete_community",
             },
+          ],
+          [
             {
-              text: "🚫 CANCEL",
+              text: "🚫 ОТМЕНА",
               callback_data: "cancel_space_create",
             },
           ],
@@ -325,10 +333,10 @@ bot.onText(/\/space_create/, async (ctx) => {
       await BotHelper.sendDelete(
         bot,
         chatId,
-        `(10s) You already managing *"${spaceName.replaceAll(
+        `Вы уже управляет *"${spaceName.replaceAll(
           "_",
           "\\_"
-        )}"* community.\nDo you want to edit it or delete? Cancel operation in any moment.`,
+        )}"* сообществом.\nВы хотите отредактировать его или удалить? Вы можете отменить данную операцию в любой момент.`,
         DELAY_DELETE.AFTER_5_SEC * 2,
         {
           parse_mode: "Markdown",
@@ -362,7 +370,7 @@ bot.onText(/\/add/, async (ctx) => {
       await BotHelper.sendDelete(
         bot,
         chatId,
-        "If you want to add yourself to any community, please register yourself once – send the command\n/add\nin the chat of that community.",
+        `Если вы хотите добавить себя в любой сообщество, зарегистрируйте себя единожды - просто отправьте команду:\n${BOT_COMMANDS.ADD_USER}\n в любом чате, где данный бот является администратором`,
         DELAY_DELETE.AFTER_5_SEC
       );
       return;
@@ -425,7 +433,7 @@ bot.onText(/\/space_login/, async (ctx) => {
       await BotHelper.sendDelete(
         bot,
         chatId,
-        `If you want login in the community space, please call\n${BOT_COMMANDS.SPACE_LOGIN}\n command in the private chat with bot\nhttps://t.me/${BOT_NAME}`,
+        `Если вы хотите аутентифицироваться и получить доступ к сообществу, вызовите ${BOT_COMMANDS.SPACE_LOGIN} команду в приватном диалоге с нашим ботом:\nhttps://t.me/${BOT_NAME}`,
         DELAY_DELETE.AFTER_5_SEC
       );
       return;
@@ -435,7 +443,7 @@ bot.onText(/\/space_login/, async (ctx) => {
       await BotHelper.sendDelete(
         bot,
         chatId,
-        `Finish previous operation before pulling this command. Previous operation was: ${lastCommand}`,
+        `Завершите предыдущую операцию перед выполнением этой команды.\nПредыдущая операция была: ${lastCommand}`,
         DELAY_DELETE.AFTER_5_SEC
       );
       return;
@@ -455,7 +463,7 @@ bot.onText(/\/space_login/, async (ctx) => {
       await BotHelper.send(
         bot,
         chatId,
-        `Before login in the space please call\n${BOT_COMMANDS.ADD_USER}\ncommand in the chat, which was included in the community, and after that try again to call command ${BOT_COMMANDS.SPACE_LOGIN}`
+        `Прежде чем аутентифицироваться в пространстве сообщества вам необходимо добавить себя в это сообщество. Это можно сделать вызвав команду: \n${BOT_COMMANDS.ADD_USER} в любом чате, где данный бот установлен в качестве администратора. После этого можете пройти авторизацию вызвав ${BOT_COMMANDS.SPACE_LOGIN} команду в приватном диалоге с ботом.`
       );
     }
     await StoreService.updateLastCommand(chatId, BOT_COMMANDS.NO_COMMAND);
@@ -486,7 +494,7 @@ bot.on("my_chat_member", async (ctx) => {
       await BotHelper.sendDelete(
         bot,
         chatId,
-        "Parsing data...",
+        "Получение данных...",
         DELAY_DELETE.AFTER_2_SEC
       );
       const chatData = await BotHelper.getChatData(bot, chatId);
@@ -506,7 +514,7 @@ bot.on("my_chat_member", async (ctx) => {
       await BotHelper.sendDelete(
         bot,
         chatId,
-        "Parsing data...",
+        "Получение данных...",
         DELAY_DELETE.AFTER_2_SEC
       );
       const { group_id } = currentGroup;
@@ -518,7 +526,6 @@ bot.on("my_chat_member", async (ctx) => {
     }
   } else {
     if (isDissmissedFromAdmin) {
-      console.log("Delete group from base: ", currentGroup);
       await GroupController.deleteGroup(API_URL, chatId);
     }
   }
@@ -622,7 +629,7 @@ bot.onText(/\/open_app/, async (ctx) => {
       await BotHelper.send(
         bot,
         chatId,
-        `Finish previous operation before pulling this command. Previous operation was: ${lastCommand}`
+        `Завершите предыдущую операцию перед выполнением этой команды.\nПредыдущая операция была: ${lastCommand}`
       );
       return;
     }
@@ -642,12 +649,12 @@ bot.onText(/\/open_app/, async (ctx) => {
     if (isPrivate) {
       if (loginData) {
         await bot
-          .sendMessage(chatId, "Click below to open the app: ", {
+          .sendMessage(chatId, "Добро пожаловать!", {
             reply_markup: {
               inline_keyboard: [
                 [
                   {
-                    text: "Open app",
+                    text: "Открыть приложение",
                     web_app: {
                       url: `${WEB_APP_URL}?user_id=${userId}&private_id=${loginData}`,
                     },
@@ -663,14 +670,14 @@ bot.onText(/\/open_app/, async (ctx) => {
         await BotHelper.send(
           bot,
           chatId,
-          `Before you will have access to community you should:\n1) call ${BOT_COMMANDS.ADD_USER} in any group of this community\n2)authorize yourself, just call ${BOT_COMMANDS.SPACE_LOGIN} here, in a private chat with this bot.\nThis will give you full access to community space.`
+          `Прежде чем получить доступ к пространству сообщества необходимо:\n1)Вызвать команду ${BOT_COMMANDS.ADD_USER} в любой группе этого сообщества где данный бот является администратором\n2)Авторизоваться в пространстве сообщества, вызвав команду ${BOT_COMMANDS.SPACE_LOGIN} в этом чате. Это предоставит вам полный доступ к пространству сообщества в котором вы состоите.\n\n Желаем удачи! ❤️`
         );
       }
     } else {
       await BotHelper.send(
         bot,
         userId,
-        `Hi!\nYou can open your application if you has been added and authorized in the space.\nBefore you will have access to community you should:\n1) call ${BOT_COMMANDS.ADD_USER} in any group of this community\n2)authorize yourself, just call ${BOT_COMMANDS.SPACE_LOGIN} here, in a private chat with this bot.This will give you full access to community space.\n3)After that just run ${BOT_COMMANDS.OPEN_APP} to get your personal link.\nThank you, hope to see you in your cozy space! ❤️`
+        `Приветствую!\nВы можете получить доступ к пространству сообщества, если вы зарегистрировались и авторизовались в сообществе. Как это сделать:\n1)Вызвать команду ${BOT_COMMANDS.ADD_USER} в любой группе этого сообщества, где данный бот является администратором\n2)Авторизоваться в пространстве сообщества, вызвав команду ${BOT_COMMANDS.SPACE_LOGIN} в этом чате. Это предоставит вам полный доступ к пространству сообщества в котором вы состоите.\n3)После этого вызовите команду${BOT_COMMANDS.OPEN_APP} чтобы получить ваш персональный линк для доступа к вашему пространству.\n\nЖелаем удачи ❤️ `
       );
     }
 
@@ -695,7 +702,7 @@ bot.onText(/\/help/, async (ctx) => {
       DELAY_DELETE.IMMEDIATELY
     );
 
-    const helpText = `/help - show all available commands\n/space_create - create your own space\n/add - add yourself to the space (active in workchat)\n/space_login - authorize in community space\n/open_app - get personal link to the space\n\nIf you already have created community space you can upload new files to this space - just send it as *FILE* to this bot`;
+    const helpText = `/help - Показать все доступные команды\n/space_create - Создать пространство вашего сообщества\n/add - Зарегистрироваться в сообществе (работает в группах)\n/delete — Удалить данные профиля или удалиться из пространства сообщества\n/space_login - Авторизоваться в пространстве сообщества\n/open_app - Получить персональную ссылку для доступа в приложение\n\nЕсли вы владелец сообщества вы можете отправлять боту файлы которые вы хотите разместить в пространстве сообщества. Просто отправьте любой документ/видео/аудиофайл и т.д. боту в личном чате.`;
 
     if (isPrivate) {
       await BotHelper.send(bot, chatId, helpText);
@@ -709,7 +716,7 @@ bot.on("channel_post", async (ctx) => {
   if (ctx.text && ctx.text.includes("#")) {
     const chatId = await BotHelper.getChatIdByMessage(ctx);
     const msgText = ctx.text;
-    const userName = ctx.author_signature ?? "Anonymous";
+    const userName = ctx.author_signature ?? "Участник сообщества";
     const link = await BotHelper.getMsgLink(ctx);
     const msgId = await BotHelper.getMsgId(ctx);
     const tags = await BotHelper.extractHashtags(ctx.text);
@@ -733,7 +740,7 @@ bot.on("edited_channel_post", async (ctx) => {
   if (ctx.text && ctx.text.includes("#")) {
     const chatId = await BotHelper.getChatIdByMessage(ctx);
     const msgText = ctx.text;
-    const userName = ctx.author_signature ?? "Anonymous";
+    const userName = ctx.author_signature ?? "Участник сообщества";
     const link = await BotHelper.getMsgLink(ctx);
     const msgId = await BotHelper.getMsgId(ctx);
     const tags = await BotHelper.extractHashtags(ctx.text);
@@ -779,11 +786,7 @@ bot.on("message", async (ctx) => {
       );
       await StoreService.updateLastCommand(chatId, BOT_COMMANDS.SPACE_CREATE);
 
-      await BotHelper.send(
-        bot,
-        chatId,
-        "Please provide community description: "
-      );
+      await BotHelper.send(bot, chatId, "Укажите описание сообщества: ");
     }
     return;
   }
@@ -808,11 +811,11 @@ bot.on("message", async (ctx) => {
         inline_keyboard: [
           [
             {
-              text: "✅ Yes",
+              text: "✅ Да",
               callback_data: "correct_space_information",
             },
             {
-              text: "🚫 No",
+              text: "🚫 Нет",
               callback_data: "incorrect_space_information",
             },
           ],
@@ -820,7 +823,7 @@ bot.on("message", async (ctx) => {
       };
       bot.sendMessage(
         chatId,
-        `Community name: ${space.name}\nCommunity description: ${space.description}\n\nIs it correct information?`,
+        `Название сообщества: ${space.name}\nОписание сообщества: ${space.description}\n\nИнформация верна?`,
         {
           reply_markup: inlineKeyboard,
         }
@@ -926,11 +929,11 @@ bot.on("callback_query", async (query) => {
       const updatedEvent = await EventController.updateEvent(API_URL, id);
       if (updatedEvent) {
         bot.answerCallbackQuery(query.id, {
-          text: `Event was succesfully added to community space`,
+          text: `Событие опубликовано в пространстве сообщества`,
         });
       } else {
         bot.answerCallbackQuery(query.id, {
-          text: `There is no such event to update`,
+          text: `Такого события больше не существует`,
         });
       }
       await BotHelper.deleteMessage(
@@ -948,11 +951,11 @@ bot.on("callback_query", async (query) => {
       const deletedEvent = await EventController.deleteEvent(API_URL, id);
       if (deletedEvent) {
         bot.answerCallbackQuery(query.id, {
-          text: `Event was declined and deleted`,
+          text: `Событие отклонено администратором и удалено`,
         });
       } else {
         bot.answerCallbackQuery(query.id, {
-          text: `Event was already deleted`,
+          text: `Событие уже удалено`,
         });
       }
       await BotHelper.deleteMessage(
@@ -981,7 +984,7 @@ bot.on("callback_query", async (query) => {
       const preparedData = await SpaceService.formatData(data, userId);
       await SpaceController.addNewSpace(bot, API_URL, preparedData, chatId);
       bot.answerCallbackQuery(query.id, {
-        text: `Your ${data.name} space was succesfully created!`,
+        text: `Ваше пространство сообщества "${data.name}" успешно создано!`,
       });
     } else {
       const { spaceId, spaceOwner } = space;
@@ -990,7 +993,7 @@ bot.on("callback_query", async (query) => {
       const preparedData = await SpaceService.formatData(data, spaceOwner);
       await SpaceController.updateSpaceData(bot, API_URL, preparedData, chatId);
       bot.answerCallbackQuery(query.id, {
-        text: `Your ${data.name} space was succesfully updated!`,
+        text: `Ваше пространство сообщества "${data.name}" было успешно обновлено!`,
       });
     }
 
@@ -1004,7 +1007,7 @@ bot.on("callback_query", async (query) => {
     await StoreService.updateLastCommand(chatId, BOT_COMMANDS.NO_COMMAND);
   } else if (callBackData === "incorrect_space_information") {
     bot.editMessageText(
-      `Please provide community data again with command /space_create.`,
+      `Если хотите повторить операцию создания пространства сообщества, вызовите команду: ${BOT_COMMANDS.SPACE_CREATE}.`,
       {
         chat_id: chatId,
         message_id: query.message.message_id,
@@ -1012,7 +1015,7 @@ bot.on("callback_query", async (query) => {
     );
 
     bot.answerCallbackQuery(query.id, {
-      text: "Community space was not created. Please try again",
+      text: "Сообщество не было создано. Попробуйте еще раз.",
     });
 
     await BotHelper.deleteMessage(
@@ -1037,7 +1040,7 @@ bot.on("callback_query", async (query) => {
       chatId,
       BOT_STATE_MANAGER_MAPPING.CREATE_SPACE_INIT
     );
-    await BotHelper.send(bot, chatId, "Provide updated community name: ");
+    await BotHelper.send(bot, chatId, "Укажите новое имя для сообщества: ");
     await StoreService.updateCommunityName(chatId, null);
     await StoreService.updateCommunityDescription(chatId, null);
     await StoreService.updateCommunityId(chatId, null);
@@ -1060,11 +1063,11 @@ bot.on("callback_query", async (query) => {
       inline_keyboard: [
         [
           {
-            text: "🔪 I'm sure, DELETE ",
+            text: "🔪 УДАЛИТЬ",
             callback_data: "delete_space_forever",
           },
           {
-            text: "🚫 CANCEL",
+            text: "🚫 ОТМЕНА",
             callback_data: "cancel_space_delete",
           },
         ],
@@ -1073,7 +1076,7 @@ bot.on("callback_query", async (query) => {
     await BotHelper.send(
       bot,
       chatId,
-      `ARE YOU SURE THAT YOU WANT DELETE YOUR SPACE?`,
+      `ВЫ ТОЧНО УВЕРЕНЫ ЧТО ХОТИТЕ УДАЛИТЬ СООБЩЕСТВО?\n\n*Эту операцию нельзя отменить...`,
       {
         reply_markup: inlineKeyboard,
       }
@@ -1099,7 +1102,7 @@ bot.on("callback_query", async (query) => {
     );
     await SpaceController.deleteSpace(bot, API_URL, chatId, chatId);
     bot.answerCallbackQuery(query.id, {
-      text: "Community space was deleted",
+      text: "Пространство сообщества было удалено",
     });
   } else if (
     callBackData === "cancel_space_delete" ||
@@ -1120,7 +1123,7 @@ bot.on("callback_query", async (query) => {
     await BotHelper.sendDelete(
       bot,
       chatId,
-      "Ok, your space still exists. Just open app: \n/open_app\nto manage it",
+      "Пространство сообщества не было удалено. Вы можете снова получить персональную ссылку отправив команду:\n/open_app\nдля управления и доступа пространством сообщества",
       DELAY_DELETE.AFTER_2_SEC
     );
   }
@@ -1194,18 +1197,18 @@ bot.on("callback_query", async (query) => {
         await UserController.updateUserData(bot, API_URL, preparedData).then(
           () => {
             bot.answerCallbackQuery(query.id, {
-              text: `You succesfully quit the ${spaceName} space`,
+              text: `Вы покинули пространство сообщества "${spaceName}"`,
             });
           }
         );
       } else {
         bot.answerCallbackQuery(query.id, {
-          text: `Space doesn't exists anymore`,
+          text: `Такого сообщества больше не существует...`,
         });
       }
     } else {
       bot.answerCallbackQuery(query.id, {
-        text: `No spaces to quit were found`,
+        text: `Вы не состоите ни в одном сообществе`,
       });
     }
 
@@ -1228,11 +1231,11 @@ bot.on("callback_query", async (query) => {
       inline_keyboard: [
         [
           {
-            text: "🔪 I'm sure, DELETE ",
+            text: "🔪 УДАЛИТЬ",
             callback_data: "delete_user_forever",
           },
           {
-            text: "🚫 CANCEL",
+            text: "🚫 ОТМЕНА",
             callback_data: "cancel_user_delete",
           },
         ],
@@ -1241,7 +1244,7 @@ bot.on("callback_query", async (query) => {
     await BotHelper.send(
       bot,
       chatId,
-      `ARE YOU SURE THAT YOU WANT DELETE YOUR PROFILE?`,
+      `ВЫ ТОЧНО УВЕРЕНЫ ЧТО ХОТИТЕ УДАЛИТЬ СВОЙ ПРОФИЛЬ?\n*Эта операция необратима`,
       {
         reply_markup: inlineKeyboard,
       }
@@ -1251,7 +1254,7 @@ bot.on("callback_query", async (query) => {
   if (callBackData === "delete_user_forever") {
     await UserController.deleteUserData(bot, API_URL, userId).then(() => {
       bot.answerCallbackQuery(query.id, {
-        text: `Your profile was succesfully deleted`,
+        text: `Ваш профиль успешно удалён`,
       });
     });
 
@@ -1274,7 +1277,7 @@ bot.on("callback_query", async (query) => {
     await BotHelper.sendDelete(
       bot,
       chatId,
-      "Ok, your profile will continue exists. Thank you!",
+      "Ваш профиль остался неизменным. Спасибо что решили остаться с нами! ❤️",
       DELAY_DELETE.AFTER_2_SEC
     );
   }
@@ -1291,7 +1294,7 @@ bot.on("audio", async (ctx) => {
       await BotHelper.send(
         bot,
         chatId,
-        `You didn't create any space for uploading files\nIf you want to manage your own space, please run command\n${BOT_COMMANDS.SPACE_CREATE}\nto create one.`
+        `У вас нет сообщества, куда можно было бы подгрузить этот аудиофайл\nЕсли вы хотите создать пространство сообщества, запустите команду: \n${BOT_COMMANDS.SPACE_CREATE}`
       );
       return;
     } else {
@@ -1304,7 +1307,7 @@ bot.on("audio", async (ctx) => {
         await BotHelper.send(
           bot,
           chatId,
-          `Finish previous upload before sending new file.`
+          `Завершите предыдущую загрузку, прежде чем посылать новый файл.`
         );
         return;
       }
@@ -1326,11 +1329,11 @@ bot.on("audio", async (ctx) => {
           inline_keyboard: [
             [
               {
-                text: "☁️ UPLOAD",
+                text: "☁️ ЗАГРУЗИТЬ",
                 callback_data: "upload_file",
               },
               {
-                text: "🚫 CANCEL",
+                text: "🚫 ОТМЕНА",
                 callback_data: "cancel_upload",
               },
             ],
@@ -1340,7 +1343,7 @@ bot.on("audio", async (ctx) => {
         await BotHelper.sendDelete(
           bot,
           chatId,
-          "Yummy...",
+          "Айдиофайл обрабатывается...",
           DELAY_DELETE.AFTER_2_SEC
         );
 
@@ -1355,7 +1358,7 @@ bot.on("audio", async (ctx) => {
         await BotHelper.send(
           bot,
           chatId,
-          `Do you want to upload ${file.file_name} to "${spaceName}" community?\n\n`,
+          `Вы хотите добавить аудиофайл ${file.file_name} в "${spaceName}" пространство?`,
           {
             reply_markup: inlineKeyboard,
           }
@@ -1376,7 +1379,7 @@ bot.on("document", async (ctx) => {
       await BotHelper.send(
         bot,
         chatId,
-        `You didn't create any space for uploading files\nIf you want to manage your own space, please run command\n${BOT_COMMANDS.SPACE_CREATE}\nto create one.`
+        `У вас нет сообщества, куда можно было бы подгрузить файл\nЕсли вы хотите создать пространство сообщества, запустите команду: \n${BOT_COMMANDS.SPACE_CREATE}`
       );
       return;
     } else {
@@ -1389,7 +1392,7 @@ bot.on("document", async (ctx) => {
         await BotHelper.send(
           bot,
           chatId,
-          `Finish previous upload before sending new file.`
+          `Завершите предыдущую загрузку, прежде чем посылать новый файл.`
         );
         return;
       }
@@ -1411,11 +1414,11 @@ bot.on("document", async (ctx) => {
           inline_keyboard: [
             [
               {
-                text: "☁️ UPLOAD",
+                text: "☁️ ЗАГРУЗИТЬ",
                 callback_data: "upload_file",
               },
               {
-                text: "🚫 CANCEL",
+                text: "🚫 ОТМЕНА",
                 callback_data: "cancel_upload",
               },
             ],
@@ -1425,7 +1428,7 @@ bot.on("document", async (ctx) => {
         await BotHelper.sendDelete(
           bot,
           chatId,
-          "Yummy...",
+          "Документ обрабатывается...",
           DELAY_DELETE.AFTER_2_SEC
         );
 
@@ -1440,7 +1443,7 @@ bot.on("document", async (ctx) => {
         await BotHelper.send(
           bot,
           chatId,
-          `Do you want to upload ${file.file_name} to "${spaceName}" community?\n\n`,
+          `Вы хотите добавить файл ${file.file_name} в "${spaceName}" пространство?`,
           {
             reply_markup: inlineKeyboard,
           }
@@ -1461,7 +1464,7 @@ bot.on("video", async (ctx) => {
       await BotHelper.send(
         bot,
         chatId,
-        `You didn't create any space for uploading files\nIf you want to manage your own space, please run command\n${BOT_COMMANDS.SPACE_CREATE}\nto create one.`
+        `У вас нет сообщества, куда можно было бы подгрузить это видео\nЕсли вы хотите создать пространство сообщества, запустите команду: \n${BOT_COMMANDS.SPACE_CREATE}`
       );
       return;
     } else {
@@ -1474,7 +1477,7 @@ bot.on("video", async (ctx) => {
         await BotHelper.send(
           bot,
           chatId,
-          `Finish previous upload before sending new file.`
+          `Завершите предыдущую загрузку, прежде чем посылать новый файл.`
         );
         return;
       }
@@ -1496,11 +1499,11 @@ bot.on("video", async (ctx) => {
           inline_keyboard: [
             [
               {
-                text: "☁️ UPLOAD",
+                text: "☁️ ЗАГРУЗИТЬ",
                 callback_data: "upload_file",
               },
               {
-                text: "🚫 CANCEL",
+                text: "🚫 ОТМЕНА",
                 callback_data: "cancel_upload",
               },
             ],
@@ -1510,7 +1513,7 @@ bot.on("video", async (ctx) => {
         await BotHelper.sendDelete(
           bot,
           chatId,
-          "Yummy...",
+          "Видео обрабатывается...",
           DELAY_DELETE.AFTER_2_SEC
         );
 
@@ -1525,7 +1528,7 @@ bot.on("video", async (ctx) => {
         await BotHelper.send(
           bot,
           chatId,
-          `Do you want to upload ${file.file_name} to "${spaceName}" community?\n\n`,
+          `Вы хотите добавить видео ${file.file_name} в "${spaceName}" пространство?`,
           {
             reply_markup: inlineKeyboard,
           }
