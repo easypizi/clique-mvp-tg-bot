@@ -63,11 +63,7 @@ if (process.env.NODE_ENV === "production") {
       const { chatId, fileUrl, fileName, fileMime } = req.body;
       const buffer = await FileController.prepareURLToBuffer(fileUrl);
 
-      await BotHelper.send(
-        bot,
-        chatId,
-        "Here is your file. Now you can download or share it, as you wish: "
-      );
+      await BotHelper.send(bot, chatId, "Вот ваш документ:");
 
       await bot.sendDocument(
         chatId,
@@ -104,7 +100,7 @@ if (process.env.NODE_ENV === "production") {
 
           const tgLink = `\@${otherUser.user_telegram_link}`;
 
-          const message = `🌟 *It's a match!!!* 🌟\n\nLooks like you have something to discuss with ${fullName}.\n____________________________\n*Some info about your contact:*\n${description}\n\nDo not wait, text immediately: ${tgLink} !\n\n*Good luck, hope this connection bring you new opportunities!*`;
+          const message = `🌟 *НЕТВОРКИНГ* 🌟\n\nПохоже у вас есть что обсудить с ${fullName}.\n____________________________\n*Немного о вашем контакте: *\n${description}\n\nВот его телеграм контакт: ${tgLink} !\n\n*Желаем удачи, надеемся это будет полезным знакомством для вас!*`;
 
           const screenedMessage = message.replaceAll("_", "\\_");
 
